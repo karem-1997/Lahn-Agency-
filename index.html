@@ -278,6 +278,23 @@
         .bot-test-fail { background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; }
         .no-bots-msg { text-align: center; padding: 25px; color: var(--text-secondary); font-size: 14px; }
         /* Responsive */
+        /* Transaction History */
+        .txn-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 9999; display: none; justify-content: center; align-items: flex-start; padding-top: 40px; overflow-y: auto; }
+        .txn-modal-box { background: var(--card-bg); border: 2px solid var(--primary-color); border-radius: 24px; padding: 25px; max-width: 700px; width: 95%; box-shadow: 0 0 60px rgba(255,26,26,0.3); animation: popIn 0.3s ease; margin-bottom: 40px; }
+        .txn-modal-box h3 { color: var(--primary-color); margin-bottom: 15px; font-size: 18px; text-align: center; }
+        .txn-header-info { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: center; color: var(--text-secondary); font-size: 13px; }
+        .txn-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 12px; overflow: hidden; font-size: 12px; margin-top: 10px; }
+        .txn-table th { background: rgba(255,26,26,0.2); color: var(--primary-color); padding: 10px 6px; text-align: center; border: 1px solid var(--glass-border); font-size: 11px; }
+        .txn-table td { padding: 8px 6px; text-align: center; border: 1px solid var(--glass-border); background: var(--glass-bg); }
+        .txn-table tr:hover td { background: rgba(255,26,26,0.05); }
+        .txn-code { font-family: monospace; background: rgba(255,26,26,0.1); padding: 2px 6px; border-radius: 4px; color: var(--primary-color); font-weight: 700; font-size: 11px; }
+        .txn-type-add { color: var(--success-color); font-weight: 700; }
+        .txn-type-deduct { color: var(--danger-color); font-weight: 700; }
+        .txn-close-btn { margin-top: 15px; }
+        .txn-download-btn { background: linear-gradient(135deg,var(--accent-blue),#005580) !important; color: #fff; padding: 8px 14px; font-size: 12px; border-radius: 8px; border: none; cursor: pointer; margin-bottom: 12px; width: auto; display: inline-flex; align-items: center; gap: 6px; }
+        .txn-download-btn:hover { transform: translateY(-2px); }
+        .txn-empty { text-align: center; padding: 30px; color: var(--text-secondary); font-style: italic; }
+        /* Staff Balance */
         .staff-balance-box { background: linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,170,0,0.1)); border: 2px solid var(--accent-gold); border-radius: 16px; padding: 18px; text-align: center; margin-bottom: 18px; position: relative; overflow: hidden; }
         .staff-balance-box .staff-balance-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
         .staff-balance-box .staff-balance-value { font-size: 32px; font-weight: 800; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,215,0,0.5); }
@@ -286,11 +303,13 @@
         .staff-balance-low .staff-balance-value { color: var(--danger-color) !important; text-shadow: 0 0 20px rgba(255,68,68,0.5) !important; }
         .staff-balance-zero { animation: pulseZero 1.5s ease-in-out infinite; }
         @keyframes pulseZero { 0%,100%{box-shadow:0 0 10px rgba(255,68,68,0.2)} 50%{box-shadow:0 0 30px rgba(255,68,68,0.6)} }
+        /* Login Blocked */
         .login-blocked-msg { background: linear-gradient(135deg,rgba(255,68,68,0.15),rgba(204,0,0,0.15)); border: 1px solid var(--danger-color); border-radius: 12px; padding: 14px; margin-top: 14px; display: none; text-align: center; }
         .login-blocked-msg.active { display: block; animation: shake 0.5s ease; }
         .login-blocked-msg .blocked-icon { font-size: 28px; margin-bottom: 6px; }
         .login-blocked-msg .blocked-text { color: var(--danger-color); font-weight: 700; font-size: 14px; }
         .login-blocked-msg .blocked-sub { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
+        /* Edit Balance Modal */
         .edit-balance-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; }
         .edit-balance-modal-box { background: var(--card-bg); border: 2px solid var(--accent-blue); border-radius: 24px; padding: 30px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 0 50px rgba(0,136,204,0.3); animation: popIn 0.3s ease; }
         .edit-balance-modal-box h3 { color: var(--accent-blue); margin-bottom: 8px; font-size: 18px; }
@@ -300,6 +319,7 @@
         .edit-balance-modal-box .current-balance .value { font-size: 28px; font-weight: 700; color: var(--accent-blue); }
         .edit-balance-modal-box .confirm-buttons { display: flex; gap: 10px; }
         .edit-balance-modal-box button { flex: 1; margin: 0; padding: 12px; font-size: 14px; }
+        /* Staff Balance Modal */
         .staff-balance-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; }
         .staff-balance-modal-box { background: var(--card-bg); border: 2px solid var(--accent-gold); border-radius: 24px; padding: 30px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 0 50px rgba(255,215,0,0.3); animation: popIn 0.3s ease; }
         .staff-balance-modal-box h3 { color: var(--accent-gold); margin-bottom: 8px; font-size: 18px; }
@@ -371,7 +391,7 @@
 
 
 
-<!-- Edit Balance Modal (for admin to edit user balance directly) -->
+<!-- Edit Balance Modal (Admin) -->
 <div id="editBalanceModalOverlay" class="edit-balance-modal-overlay">
     <div class="edit-balance-modal-box">
         <h3>✏️ تعديل رصيد المستخدم</h3>
@@ -381,17 +401,17 @@
             <div class="value" id="editBalanceModalCurrent">0.00 $</div>
         </div>
         <div class="form-group">
-            <label>المبلغ الجديد (سيتم استبدال الرصيد الحالي)</label>
+            <label>المبلغ الجديد (سيتم استبدال الرصيد)</label>
             <input type="number" id="editBalanceNewAmount" placeholder="0.00" min="0" step="0.01">
         </div>
         <div class="confirm-buttons">
             <button class="btn-cancel" onclick="closeEditBalanceModal()">إلغاء</button>
-            <button class="btn-success" onclick="confirmEditBalance()">✅ حفظ التعديل</button>
+            <button class="btn-success" onclick="confirmEditBalance()">✅ حفظ</button>
         </div>
     </div>
 </div>
 
-<!-- Staff Balance Modal (for admin to add staff balance) -->
+<!-- Staff Balance Modal (Admin) -->
 <div id="staffBalanceModalOverlay" class="staff-balance-modal-overlay">
     <div class="staff-balance-modal-box">
         <h3>💰 إضافة رصيد للموظف</h3>
@@ -406,8 +426,30 @@
         </div>
         <div class="confirm-buttons">
             <button class="btn-cancel" onclick="closeStaffBalanceModal()">إلغاء</button>
-            <button class="btn-gold" onclick="confirmAddStaffBalance()">✅ إضافة الرصيد</button>
+            <button class="btn-gold" onclick="confirmAddStaffBalance()">✅ إضافة</button>
         </div>
+    </div>
+</div>
+
+<!-- Staff Transaction History Modal -->
+<div id="staffTxnModalOverlay" class="txn-modal-overlay">
+    <div class="txn-modal-box">
+        <h3>📋 سجل معاملات الرصيد - الموظف</h3>
+        <div class="txn-header-info" id="staffTxnHeader"></div>
+        <button class="txn-download-btn" onclick="downloadStaffTxnPDF()">📥 تحميل الفاتورة (PDF)</button>
+        <div id="staffTxnList"></div>
+        <button class="btn-secondary txn-close-btn" onclick="closeStaffTxnModal()">إغلاق</button>
+    </div>
+</div>
+
+<!-- User Transaction History Modal -->
+<div id="userTxnModalOverlay" class="txn-modal-overlay">
+    <div class="txn-modal-box">
+        <h3>📋 سجل معاملات الرصيد - المستخدم</h3>
+        <div class="txn-header-info" id="userTxnHeader"></div>
+        <button class="txn-download-btn" onclick="downloadUserTxnPDF()">📥 تحميل الفاتورة (PDF)</button>
+        <div id="userTxnList"></div>
+        <button class="btn-secondary txn-close-btn" onclick="closeUserTxnModal()">إغلاق</button>
     </div>
 </div>
 
@@ -938,6 +980,7 @@
         currentBalanceTarget = null;
         document.getElementById('balanceModalOverlay').style.display = 'none';
     }
+
     // ==================== EDIT BALANCE (ADMIN) ====================
     let currentEditBalanceTarget = null;
 
@@ -963,9 +1006,19 @@
         if (!currentEditBalanceTarget) { closeEditBalanceModal(); return; }
         const newAmount = parseFloat(document.getElementById('editBalanceNewAmount').value);
         if (isNaN(newAmount) || newAmount < 0) { alert('❌ يرجى إدخال مبلغ صحيح!'); return; }
-        db.ref('user_accounts/' + currentEditBalanceTarget).update({ balance: newAmount })
-        .then(() => {
-            showToast('✅ تم تعديل الرصيد إلى ' + newAmount.toFixed(2) + ' $');
+        const userRef = db.ref('user_accounts/' + currentEditBalanceTarget);
+        userRef.once('value').then(snap => {
+            const data = snap.val() || {};
+            const oldBalance = data.balance || 0;
+            const diff = newAmount - oldBalance;
+            const code = generateTxnCode();
+            const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
+            const txn = { type: diff >= 0 ? 'add' : 'deduct', amount: Math.abs(diff), code: code, date: now, description: 'تعديل رصيد يدوي (من ' + oldBalance.toFixed(2) + ' إلى ' + newAmount.toFixed(2) + ')', balanceAfter: newAmount, admin: currentLoggedStaff || 'system' };
+            return db.ref('user_transactions/' + currentEditBalanceTarget).push().set(txn).then(() => {
+                return userRef.update({ balance: newAmount });
+            });
+        }).then(() => {
+            showToast('✅ تم تعديل الرصيد بنجاح!');
             closeEditBalanceModal();
         }).catch(err => { alert('❌ خطأ: ' + err.message); });
     }
@@ -999,7 +1052,12 @@
         staffRef.once('value').then(snap => {
             const data = snap.val() || {};
             const newBalance = (data.balance || 0) + amount;
-            return staffRef.update({ balance: newBalance });
+            const code = generateTxnCode();
+            const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
+            const txn = { type: 'add', amount: amount, code: code, date: now, description: 'إضافة رصيد من الإدارة', balanceAfter: newBalance, admin: currentLoggedStaff || 'system' };
+            return db.ref('staff_transactions/' + currentStaffBalanceTarget).push().set(txn).then(() => {
+                return staffRef.update({ balance: newBalance });
+            });
         }).then(() => {
             showToast('✅ تم إضافة ' + amount.toFixed(2) + ' $ لرصيد الموظف!');
             closeStaffBalanceModal();
@@ -1015,11 +1073,8 @@
         const boxEl = document.getElementById('staffBalanceBox');
         if (balanceEl) balanceEl.innerText = balance.toFixed(2);
         if (boxEl) {
-            if (balance <= 0) {
-                boxEl.classList.add('staff-balance-low', 'staff-balance-zero');
-            } else {
-                boxEl.classList.remove('staff-balance-low', 'staff-balance-zero');
-            }
+            if (balance <= 0) { boxEl.classList.add('staff-balance-low', 'staff-balance-zero'); }
+            else { boxEl.classList.remove('staff-balance-low', 'staff-balance-zero'); }
         }
     }
 
@@ -1032,8 +1087,193 @@
             const data = snap.val() || {};
             const currentBalance = data.balance || 0;
             const newBalance = Math.max(0, currentBalance - amount);
-            return staffRef.update({ balance: newBalance });
+            const code = generateTxnCode();
+            const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
+            const txn = { type: 'deduct', amount: amount, code: code, date: now, description: 'خصم مقابل شحنة عميل', balanceAfter: newBalance, admin: 'system_auto' };
+            return db.ref('staff_transactions/' + currentLoggedStaff).push().set(txn).then(() => {
+                return staffRef.update({ balance: newBalance });
+            });
         });
+    }
+
+    // ==================== TRANSACTION CODE GENERATOR ====================
+    function generateTxnCode() {
+        const now = new Date();
+        const dateStr = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+        const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+        return 'TXN-' + dateStr + '-' + randomStr;
+    }
+
+    // ==================== USER TRANSACTION HISTORY ====================
+    function openUserTxnModal(userKey, userName) {
+        const overlay = document.getElementById('userTxnModalOverlay');
+        const header = document.getElementById('userTxnHeader');
+        const list = document.getElementById('userTxnList');
+        if (header) header.innerText = 'المستخدم: ' + userName;
+        if (list) list.innerHTML = '<div class="txn-empty">⏳ جاري التحميل...</div>';
+        if (overlay) overlay.style.display = 'flex';
+        db.ref('user_transactions/' + userKey).once('value').then(snapshot => {
+            let txns = [];
+            snapshot.forEach(child => { let t = child.val(); t._key = child.key; txns.push(t); });
+            txns.sort((a, b) => { const da = parseLogDate(a.date) || new Date(0); const db2 = parseLogDate(b.date) || new Date(0); return db2 - da; });
+            if (txns.length === 0) { list.innerHTML = '<div class="txn-empty">📭 لا توجد معاملات مسجلة</div>'; return; }
+            let html = '<table class="txn-table"><thead><tr><th>الكود</th><th>النوع</th><th>المبلغ</th><th>الوصف</th><th>الرصيد بعد</th><th>التاريخ</th><th>الإداري</th></tr></thead><tbody>';
+            txns.forEach(t => {
+                const typeClass = t.type === 'add' ? 'txn-type-add' : 'txn-type-deduct';
+                const typeText = t.type === 'add' ? '➕ إضافة' : '➖ خصم';
+                html += '<tr><td><span class="txn-code">' + (t.code || '---') + '</span></td><td class="' + typeClass + '">' + typeText + '</td><td>' + (t.amount || 0).toFixed(2) + ' $</td><td>' + (t.description || '') + '</td><td>' + (t.balanceAfter || 0).toFixed(2) + ' $</td><td>' + (t.date || '') + '</td><td>' + (t.admin || '---') + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            list.innerHTML = html;
+        }).catch(err => { list.innerHTML = '<div class="txn-empty">❌ خطأ في التحميل</div>'; console.error(err); });
+    }
+
+    function closeUserTxnModal() {
+        document.getElementById('userTxnModalOverlay').style.display = 'none';
+    }
+
+    function downloadUserTxnPDF() {
+        const headerText = document.getElementById('userTxnHeader').innerText;
+        const table = document.querySelector('#userTxnList table');
+        if (!table) { alert('لا توجد بيانات للتحميل!'); return; }
+        let reportHtml = '<div id="pdf-report" style="width:210mm;padding:15mm;background:#ffffff;direction:rtl;font-family:Arial,sans-serif;color:#000;box-sizing:border-box;">';
+        reportHtml += '<div style="text-align:center;margin-bottom:15px;">';
+        reportHtml += '<h2 style="color:#cc0000;margin:0;font-size:22px;">Ali Recharge Agency</h2>';
+        reportHtml += '<h3 style="color:#333;margin:5px 0;font-size:16px;">فاتورة معاملات الرصيد</h3>';
+        reportHtml += '<p style="color:#666;font-size:12px;margin:5px 0;">' + headerText + '</p>';
+        reportHtml += '<p style="color:#666;font-size:12px;margin:5px 0;">تاريخ الفاتورة: ' + new Date().toLocaleDateString('en-US') + '</p>';
+        reportHtml += '<hr style="border:1px solid #cc0000;margin:10px 0;"></div>';
+        reportHtml += '<table style="width:100%;border-collapse:collapse;font-size:11px;color:#000;">';
+        reportHtml += '<thead><tr style="background:#cc0000;color:#fff;">';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الكود</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">النوع</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">المبلغ</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الوصف</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الرصيد بعد</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">التاريخ</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الإداري</th>';
+        reportHtml += '</tr></thead><tbody>';
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach((row, i) => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 7) {
+                const bg = i % 2 === 0 ? '#ffffff' : '#f9f9f9';
+                reportHtml += '<tr style="background:' + bg + ';">';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;font-family:monospace;">' + cells[0].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[1].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[2].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[3].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[4].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[5].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[6].innerText + '</td>';
+                reportHtml += '</tr>';
+            }
+        });
+        reportHtml += '</tbody></table></div>';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = reportHtml;
+        tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0';
+        document.body.appendChild(tempDiv);
+        const element = tempDiv.querySelector('#pdf-report');
+        html2canvas(element, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false }).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 210, pageHeight = 297;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight, position = 0;
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight; }
+            pdf.save('فاتورة_معاملات_المستخدم_' + new Date().toLocaleDateString('en-US').replace(/\//g, '-') + '.pdf');
+            document.body.removeChild(tempDiv);
+        }).catch(err => { console.error('PDF Error:', err); document.body.removeChild(tempDiv); });
+    }
+
+    // ==================== STAFF TRANSACTION HISTORY ====================
+    function openStaffTxnModal(staffUsername) {
+        const overlay = document.getElementById('staffTxnModalOverlay');
+        const header = document.getElementById('staffTxnHeader');
+        const list = document.getElementById('staffTxnList');
+        if (header) header.innerText = 'الموظف: ' + staffUsername;
+        if (list) list.innerHTML = '<div class="txn-empty">⏳ جاري التحميل...</div>';
+        if (overlay) overlay.style.display = 'flex';
+        db.ref('staff_transactions/' + staffUsername).once('value').then(snapshot => {
+            let txns = [];
+            snapshot.forEach(child => { let t = child.val(); t._key = child.key; txns.push(t); });
+            txns.sort((a, b) => { const da = parseLogDate(a.date) || new Date(0); const db2 = parseLogDate(b.date) || new Date(0); return db2 - da; });
+            if (txns.length === 0) { list.innerHTML = '<div class="txn-empty">📭 لا توجد معاملات مسجلة</div>'; return; }
+            let html = '<table class="txn-table"><thead><tr><th>الكود</th><th>النوع</th><th>المبلغ</th><th>الوصف</th><th>الرصيد بعد</th><th>التاريخ</th><th>الإداري</th></tr></thead><tbody>';
+            txns.forEach(t => {
+                const typeClass = t.type === 'add' ? 'txn-type-add' : 'txn-type-deduct';
+                const typeText = t.type === 'add' ? '➕ إضافة' : '➖ خصم';
+                html += '<tr><td><span class="txn-code">' + (t.code || '---') + '</span></td><td class="' + typeClass + '">' + typeText + '</td><td>' + (t.amount || 0).toFixed(2) + ' $</td><td>' + (t.description || '') + '</td><td>' + (t.balanceAfter || 0).toFixed(2) + ' $</td><td>' + (t.date || '') + '</td><td>' + (t.admin || '---') + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            list.innerHTML = html;
+        }).catch(err => { list.innerHTML = '<div class="txn-empty">❌ خطأ في التحميل</div>'; console.error(err); });
+    }
+
+    function closeStaffTxnModal() {
+        document.getElementById('staffTxnModalOverlay').style.display = 'none';
+    }
+
+    function downloadStaffTxnPDF() {
+        const headerText = document.getElementById('staffTxnHeader').innerText;
+        const table = document.querySelector('#staffTxnList table');
+        if (!table) { alert('لا توجد بيانات للتحميل!'); return; }
+        let reportHtml = '<div id="pdf-report" style="width:210mm;padding:15mm;background:#ffffff;direction:rtl;font-family:Arial,sans-serif;color:#000;box-sizing:border-box;">';
+        reportHtml += '<div style="text-align:center;margin-bottom:15px;">';
+        reportHtml += '<h2 style="color:#cc0000;margin:0;font-size:22px;">Ali Recharge Agency</h2>';
+        reportHtml += '<h3 style="color:#333;margin:5px 0;font-size:16px;">فاتورة معاملات رصيد الموظف</h3>';
+        reportHtml += '<p style="color:#666;font-size:12px;margin:5px 0;">' + headerText + '</p>';
+        reportHtml += '<p style="color:#666;font-size:12px;margin:5px 0;">تاريخ الفاتورة: ' + new Date().toLocaleDateString('en-US') + '</p>';
+        reportHtml += '<hr style="border:1px solid #cc0000;margin:10px 0;"></div>';
+        reportHtml += '<table style="width:100%;border-collapse:collapse;font-size:11px;color:#000;">';
+        reportHtml += '<thead><tr style="background:#cc0000;color:#fff;">';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الكود</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">النوع</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">المبلغ</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الوصف</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الرصيد بعد</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">التاريخ</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الإداري</th>';
+        reportHtml += '</tr></thead><tbody>';
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach((row, i) => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 7) {
+                const bg = i % 2 === 0 ? '#ffffff' : '#f9f9f9';
+                reportHtml += '<tr style="background:' + bg + ';">';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;font-family:monospace;">' + cells[0].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[1].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[2].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[3].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[4].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[5].innerText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[6].innerText + '</td>';
+                reportHtml += '</tr>';
+            }
+        });
+        reportHtml += '</tbody></table></div>';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = reportHtml;
+        tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0';
+        document.body.appendChild(tempDiv);
+        const element = tempDiv.querySelector('#pdf-report');
+        html2canvas(element, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false }).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 210, pageHeight = 297;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight, position = 0;
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight; }
+            pdf.save('فاتورة_معاملات_الموظف_' + new Date().toLocaleDateString('en-US').replace(/\//g, '-') + '.pdf');
+            document.body.removeChild(tempDiv);
+        }).catch(err => { console.error('PDF Error:', err); document.body.removeChild(tempDiv); });
     }
 
 
@@ -1190,8 +1430,7 @@
         snapshot.forEach(child => {
             let ua = child.val(); ua._key = child.key; userAccounts.push(ua);
             if(tbody) tbody.innerHTML += '<tr><td>' + ua.name + '</td><td>' + ua.id + '</td><td>' + ua.password + '</td><td style="color:var(--success-color);font-weight:700;">' + (ua.balance || 0) + '$</td><td>' + (ua.debt || 0) + '$</td>' +
-            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">💰 إضافة</button>' +
-            '<button class="btn-blue" style="padding:5px;font-size:11px;" onclick="openEditBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">✏️ تعديل</button>' +
+            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">💰 إضافة</button>' + '<button class="btn-blue" style="padding:5px;font-size:11px;" onclick="openEditBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">✏️ تعديل</button>' + '<button class="btn-warning" style="padding:5px;font-size:11px;" onclick="openUserTxnModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">📋 سجل</button>' +
             '<button class="btn-danger" style="padding:5px;font-size:11px;" onclick="deleteUserAccount(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">🗑️ حذف</button></td></tr>';
         });
         if(currentLoggedUser) {
@@ -1564,8 +1803,9 @@
             const tr = document.createElement('tr');
             tr.innerHTML = '<td><strong>' + st.username + '</strong></td><td>' + st.password + '</td>' +
             '<td style="color:var(--accent-gold);font-weight:700;">' + (st.balance || 0) + '$</td>' +
-            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openStaffBalanceModal(&quot;' + st.username + '&quot;,' + (st.balance || 0) + ')">💰 رصيد</button>' +
-            '<button class="btn-danger" style="padding:5px;font-size:11px;" onclick="deleteStaff(&quot;' + st.username + '&quot;)">حذف</button></td>';
+            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openStaffBalanceModal(&quot;' + st.username + '&quot;,' + (st.balance || 0) + ')">💰 إضافة</button>' +
+            '<button class="btn-blue" style="padding:5px;font-size:11px;" onclick="openStaffTxnModal(&quot;' + st.username + '&quot;)">📋 سجل</button>' +
+            '<button class="btn-danger" style="padding:5px;font-size:11px;" onclick="deleteStaff(&quot;' + st.username + '&quot;)">🗑️ حذف</button></td>';
             tbody.appendChild(tr);
         });
     }
@@ -1972,6 +2212,10 @@
         if (editBalanceOverlay) editBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeEditBalanceModal(); });
         const staffBalanceOverlay = document.getElementById('staffBalanceModalOverlay');
         if (staffBalanceOverlay) staffBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffBalanceModal(); });
+        const staffTxnOverlay = document.getElementById('staffTxnModalOverlay');
+        if (staffTxnOverlay) staffTxnOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffTxnModal(); });
+        const userTxnOverlay = document.getElementById('userTxnModalOverlay');
+        if (userTxnOverlay) userTxnOverlay.addEventListener('click', function(e) { if (e.target === this) closeUserTxnModal(); });
     });
 </script>
 </body>
