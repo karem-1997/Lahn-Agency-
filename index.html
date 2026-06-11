@@ -278,6 +278,37 @@
         .bot-test-fail { background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; }
         .no-bots-msg { text-align: center; padding: 25px; color: var(--text-secondary); font-size: 14px; }
         /* Responsive */
+        .staff-balance-box { background: linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,170,0,0.1)); border: 2px solid var(--accent-gold); border-radius: 16px; padding: 18px; text-align: center; margin-bottom: 18px; position: relative; overflow: hidden; }
+        .staff-balance-box .staff-balance-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+        .staff-balance-box .staff-balance-value { font-size: 32px; font-weight: 800; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,215,0,0.5); }
+        .staff-balance-box .staff-balance-currency { font-size: 16px; color: var(--text-secondary); }
+        .staff-balance-low { border-color: var(--danger-color) !important; background: linear-gradient(135deg,rgba(255,68,68,0.1),rgba(204,0,0,0.1)) !important; }
+        .staff-balance-low .staff-balance-value { color: var(--danger-color) !important; text-shadow: 0 0 20px rgba(255,68,68,0.5) !important; }
+        .staff-balance-zero { animation: pulseZero 1.5s ease-in-out infinite; }
+        @keyframes pulseZero { 0%,100%{box-shadow:0 0 10px rgba(255,68,68,0.2)} 50%{box-shadow:0 0 30px rgba(255,68,68,0.6)} }
+        .login-blocked-msg { background: linear-gradient(135deg,rgba(255,68,68,0.15),rgba(204,0,0,0.15)); border: 1px solid var(--danger-color); border-radius: 12px; padding: 14px; margin-top: 14px; display: none; text-align: center; }
+        .login-blocked-msg.active { display: block; animation: shake 0.5s ease; }
+        .login-blocked-msg .blocked-icon { font-size: 28px; margin-bottom: 6px; }
+        .login-blocked-msg .blocked-text { color: var(--danger-color); font-weight: 700; font-size: 14px; }
+        .login-blocked-msg .blocked-sub { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
+        .edit-balance-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; }
+        .edit-balance-modal-box { background: var(--card-bg); border: 2px solid var(--accent-blue); border-radius: 24px; padding: 30px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 0 50px rgba(0,136,204,0.3); animation: popIn 0.3s ease; }
+        .edit-balance-modal-box h3 { color: var(--accent-blue); margin-bottom: 8px; font-size: 18px; }
+        .edit-balance-modal-box .user-info { color: var(--text-secondary); margin-bottom: 18px; font-size: 14px; }
+        .edit-balance-modal-box .current-balance { background: rgba(0,136,204,0.1); border: 1px solid var(--accent-blue); border-radius: 12px; padding: 12px; margin-bottom: 18px; }
+        .edit-balance-modal-box .current-balance .label { font-size: 12px; color: var(--text-secondary); }
+        .edit-balance-modal-box .current-balance .value { font-size: 28px; font-weight: 700; color: var(--accent-blue); }
+        .edit-balance-modal-box .confirm-buttons { display: flex; gap: 10px; }
+        .edit-balance-modal-box button { flex: 1; margin: 0; padding: 12px; font-size: 14px; }
+        .staff-balance-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; }
+        .staff-balance-modal-box { background: var(--card-bg); border: 2px solid var(--accent-gold); border-radius: 24px; padding: 30px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 0 50px rgba(255,215,0,0.3); animation: popIn 0.3s ease; }
+        .staff-balance-modal-box h3 { color: var(--accent-gold); margin-bottom: 8px; font-size: 18px; }
+        .staff-balance-modal-box .staff-info { color: var(--text-secondary); margin-bottom: 18px; font-size: 14px; }
+        .staff-balance-modal-box .current-balance { background: rgba(255,215,0,0.1); border: 1px solid var(--accent-gold); border-radius: 12px; padding: 12px; margin-bottom: 18px; }
+        .staff-balance-modal-box .current-balance .label { font-size: 12px; color: var(--text-secondary); }
+        .staff-balance-modal-box .current-balance .value { font-size: 28px; font-weight: 700; color: var(--accent-gold); }
+        .staff-balance-modal-box .confirm-buttons { display: flex; gap: 10px; }
+        .staff-balance-modal-box button { flex: 1; margin: 0; padding: 12px; font-size: 14px; }
         @media (max-width:600px) {
             body{padding:8px} .container{padding:16px;margin-top:55px;border-radius:20px} h2{font-size:20px;padding-bottom:10px} h3{font-size:17px}
             .admin-gear-container{top:8px;left:8px;padding:8px 12px;font-size:12px} .admin-gear-container span{font-size:16px}
@@ -338,6 +369,48 @@
     </div>
 </div>
 
+
+
+<!-- Edit Balance Modal (for admin to edit user balance directly) -->
+<div id="editBalanceModalOverlay" class="edit-balance-modal-overlay">
+    <div class="edit-balance-modal-box">
+        <h3>✏️ تعديل رصيد المستخدم</h3>
+        <div class="user-info" id="editBalanceModalUserInfo"></div>
+        <div class="current-balance">
+            <div class="label">الرصيد الحالي</div>
+            <div class="value" id="editBalanceModalCurrent">0.00 $</div>
+        </div>
+        <div class="form-group">
+            <label>المبلغ الجديد (سيتم استبدال الرصيد الحالي)</label>
+            <input type="number" id="editBalanceNewAmount" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="confirm-buttons">
+            <button class="btn-cancel" onclick="closeEditBalanceModal()">إلغاء</button>
+            <button class="btn-success" onclick="confirmEditBalance()">✅ حفظ التعديل</button>
+        </div>
+    </div>
+</div>
+
+<!-- Staff Balance Modal (for admin to add staff balance) -->
+<div id="staffBalanceModalOverlay" class="staff-balance-modal-overlay">
+    <div class="staff-balance-modal-box">
+        <h3>💰 إضافة رصيد للموظف</h3>
+        <div class="staff-info" id="staffBalanceModalStaffInfo"></div>
+        <div class="current-balance">
+            <div class="label">الرصيد الحالي</div>
+            <div class="value" id="staffBalanceModalCurrent">0.00 $</div>
+        </div>
+        <div class="form-group">
+            <label>المبلغ المراد إضافته</label>
+            <input type="number" id="staffBalanceAddAmount" placeholder="0.00" min="0.01" step="0.01">
+        </div>
+        <div class="confirm-buttons">
+            <button class="btn-cancel" onclick="closeStaffBalanceModal()">إلغاء</button>
+            <button class="btn-gold" onclick="confirmAddStaffBalance()">✅ إضافة الرصيد</button>
+        </div>
+    </div>
+</div>
+
 <div id="notifBell" class="notif-bell" onclick="toggleNotifications()">
     <span class="bell-icon">🔔</span>
     <span>الإشعارات</span>
@@ -375,12 +448,25 @@
             </div>
             <button type="submit">تسجيل الدخول</button>
         </form>
+        <div id="loginBlockedMsg" class="login-blocked-msg">
+            <div class="blocked-icon">🚫</div>
+            <div class="blocked-text">الرصيد غير كافٍ!</div>
+            <div class="blocked-sub">لا يمكن تسجيل الدخول. الرصيد صفر أو غير متاح. تواصل مع الإدارة لإضافة رصيد.</div>
+        </div>
+
     </div>
 
     <!-- STAFF DASHBOARD -->
     <div id="dashboardPage" class="form-page">
         <h2>لوحة العمليات الشحن [Ali Recharge Agency]</h2>
         <div id="staffBadge" class="badge"></div>
+
+        <!-- Staff Balance Display -->
+        <div id="staffBalanceBox" class="staff-balance-box">
+            <div class="staff-balance-label">💰 رصيدك المتاح</div>
+            <div class="staff-balance-value" id="staffBalanceValue">0.00</div>
+            <div class="staff-balance-currency">دولار أمريكي</div>
+        </div>
         <div class="search-container">
             <label style="color: var(--primary-color); font-weight: bold;">🔍 فحص فوري للمديونيات والحساب:</label>
             <div class="flex-group">
@@ -623,7 +709,7 @@
         </div>
 
         <h3 style="color: var(--primary-color); font-size: 16px; margin-top:15px;">الموظفون الحاليون:</h3>
-        <div class="table-wrapper"><table class="admin-table"><thead><tr><th>الموظف</th><th>الباسورد</th><th>إجراء</th></tr></thead><tbody id="staffTableBody"></tbody></table></div>
+        <div class="table-wrapper"><table class="admin-table"><thead><tr><th>الموظف</th><th>الباسورد</th><th>الرصيد</th><th>إجراء</th></tr></thead><tbody id="staffTableBody"></tbody></table></div>
 
         <div class="box-light" style="margin-top:20px; border: 1px solid var(--warning-color);">
             <h3>👤 إنشاء حساب مستخدم جديد (للبوابة)</h3>
@@ -852,6 +938,104 @@
         currentBalanceTarget = null;
         document.getElementById('balanceModalOverlay').style.display = 'none';
     }
+    // ==================== EDIT BALANCE (ADMIN) ====================
+    let currentEditBalanceTarget = null;
+
+    function openEditBalanceModal(userKey, userName, currentBalance) {
+        currentEditBalanceTarget = userKey;
+        const overlay = document.getElementById('editBalanceModalOverlay');
+        const userInfo = document.getElementById('editBalanceModalUserInfo');
+        const currentBal = document.getElementById('editBalanceModalCurrent');
+        if (overlay && userInfo && currentBal) {
+            userInfo.innerText = 'المستخدم: ' + userName;
+            currentBal.innerText = (currentBalance || 0).toFixed(2) + ' $';
+            document.getElementById('editBalanceNewAmount').value = (currentBalance || 0).toFixed(2);
+            overlay.style.display = 'flex';
+        }
+    }
+
+    function closeEditBalanceModal() {
+        currentEditBalanceTarget = null;
+        document.getElementById('editBalanceModalOverlay').style.display = 'none';
+    }
+
+    function confirmEditBalance() {
+        if (!currentEditBalanceTarget) { closeEditBalanceModal(); return; }
+        const newAmount = parseFloat(document.getElementById('editBalanceNewAmount').value);
+        if (isNaN(newAmount) || newAmount < 0) { alert('❌ يرجى إدخال مبلغ صحيح!'); return; }
+        db.ref('user_accounts/' + currentEditBalanceTarget).update({ balance: newAmount })
+        .then(() => {
+            showToast('✅ تم تعديل الرصيد إلى ' + newAmount.toFixed(2) + ' $');
+            closeEditBalanceModal();
+        }).catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
+    // ==================== STAFF BALANCE ====================
+    let currentStaffBalanceTarget = null;
+
+    function openStaffBalanceModal(staffUsername, currentBalance) {
+        currentStaffBalanceTarget = staffUsername;
+        const overlay = document.getElementById('staffBalanceModalOverlay');
+        const staffInfo = document.getElementById('staffBalanceModalStaffInfo');
+        const currentBal = document.getElementById('staffBalanceModalCurrent');
+        if (overlay && staffInfo && currentBal) {
+            staffInfo.innerText = 'الموظف: ' + staffUsername;
+            currentBal.innerText = (currentBalance || 0).toFixed(2) + ' $';
+            document.getElementById('staffBalanceAddAmount').value = '';
+            overlay.style.display = 'flex';
+        }
+    }
+
+    function closeStaffBalanceModal() {
+        currentStaffBalanceTarget = null;
+        document.getElementById('staffBalanceModalOverlay').style.display = 'none';
+    }
+
+    function confirmAddStaffBalance() {
+        if (!currentStaffBalanceTarget) { closeStaffBalanceModal(); return; }
+        const amount = parseFloat(document.getElementById('staffBalanceAddAmount').value);
+        if (!amount || amount <= 0) { alert('❌ يرجى إدخال مبلغ صحيح!'); return; }
+        const staffRef = db.ref('staff/' + currentStaffBalanceTarget);
+        staffRef.once('value').then(snap => {
+            const data = snap.val() || {};
+            const newBalance = (data.balance || 0) + amount;
+            return staffRef.update({ balance: newBalance });
+        }).then(() => {
+            showToast('✅ تم إضافة ' + amount.toFixed(2) + ' $ لرصيد الموظف!');
+            closeStaffBalanceModal();
+        }).catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
+    function updateStaffBalanceUI() {
+        if (!currentLoggedStaff) return;
+        const staff = staffAccounts.find(s => s.username === currentLoggedStaff);
+        if (!staff) return;
+        const balance = staff.balance || 0;
+        const balanceEl = document.getElementById('staffBalanceValue');
+        const boxEl = document.getElementById('staffBalanceBox');
+        if (balanceEl) balanceEl.innerText = balance.toFixed(2);
+        if (boxEl) {
+            if (balance <= 0) {
+                boxEl.classList.add('staff-balance-low', 'staff-balance-zero');
+            } else {
+                boxEl.classList.remove('staff-balance-low', 'staff-balance-zero');
+            }
+        }
+    }
+
+    function deductStaffBalance(amount) {
+        if (!currentLoggedStaff || !amount || amount <= 0) return Promise.resolve();
+        const staff = staffAccounts.find(s => s.username === currentLoggedStaff);
+        if (!staff) return Promise.resolve();
+        const staffRef = db.ref('staff/' + currentLoggedStaff);
+        return staffRef.once('value').then(snap => {
+            const data = snap.val() || {};
+            const currentBalance = data.balance || 0;
+            const newBalance = Math.max(0, currentBalance - amount);
+            return staffRef.update({ balance: newBalance });
+        });
+    }
+
 
     function confirmAddBalance() {
         if (!currentBalanceTarget) { closeBalanceModal(); return; }
@@ -1006,8 +1190,9 @@
         snapshot.forEach(child => {
             let ua = child.val(); ua._key = child.key; userAccounts.push(ua);
             if(tbody) tbody.innerHTML += '<tr><td>' + ua.name + '</td><td>' + ua.id + '</td><td>' + ua.password + '</td><td style="color:var(--success-color);font-weight:700;">' + (ua.balance || 0) + '$</td><td>' + (ua.debt || 0) + '$</td>' +
-            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">💰 رصيد</button>' +
-            '<button class="btn-danger" style="padding:5px;font-size:11px;" onclick="deleteUserAccount(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">حذف</button></td></tr>';
+            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">💰 إضافة</button>' +
+            '<button class="btn-blue" style="padding:5px;font-size:11px;" onclick="openEditBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">✏️ تعديل</button>' +
+            '<button class="btn-danger" style="padding:5px;font-size:11px;" onclick="deleteUserAccount(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">🗑️ حذف</button></td></tr>';
         });
         if(currentLoggedUser) {
             const updated = userAccounts.find(u => u._key === currentLoggedUser._key);
@@ -1019,7 +1204,7 @@
         staffAccounts = [];
         snapshot.forEach(child => { staffAccounts.push(child.val()); });
         renderStaffTable();
-        if(staffAccounts.length === 0) db.ref('staff/كريم').set({ username: "كريم", password: "123" });
+        if(staffAccounts.length === 0) db.ref('staff/كريم').set({ username: "كريم", password: "123", balance: 0 });
     });
 
     db.ref('settings').on('value', snapshot => {
@@ -1281,9 +1466,15 @@
         event.preventDefault();
         const user = document.getElementById('loginUser').value.trim();
         const pass = document.getElementById('loginPass').value.trim();
+        document.getElementById('loginBlockedMsg').classList.remove('active');
         if(currentLoginType === 'staff') {
             const match = staffAccounts.find(s => s.username === user && s.password === pass);
             if (match) {
+                const staffBalance = match.balance || 0;
+                if (staffBalance <= 0) {
+                    document.getElementById('loginBlockedMsg').classList.add('active');
+                    return;
+                }
                 currentLoggedStaff = match.username;
                 document.getElementById('loginPage').classList.remove('active');
                 document.getElementById('dashboardPage').classList.add('active');
@@ -1291,6 +1482,7 @@
                 document.getElementById('notifBell').style.display = 'flex';
                 updateNotificationBadge();
                 loadClientsDropdown();
+                updateStaffBalanceUI();
             } else { alert("بيانات خاطئة!"); }
         } else {
             const match = userAccounts.find(u => u.name === user && u.password === pass);
@@ -1371,7 +1563,9 @@
         staffAccounts.forEach((st) => {
             const tr = document.createElement('tr');
             tr.innerHTML = '<td><strong>' + st.username + '</strong></td><td>' + st.password + '</td>' +
-            '<td><button class="btn-danger" onclick="deleteStaff(&quot;' + st.username + '&quot;)">حذف</button></td>';
+            '<td style="color:var(--accent-gold);font-weight:700;">' + (st.balance || 0) + '$</td>' +
+            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openStaffBalanceModal(&quot;' + st.username + '&quot;,' + (st.balance || 0) + ')">💰 رصيد</button>' +
+            '<button class="btn-danger" style="padding:5px;font-size:11px;" onclick="deleteStaff(&quot;' + st.username + '&quot;)">حذف</button></td>';
             tbody.appendChild(tr);
         });
     }
@@ -1380,7 +1574,7 @@
         event.preventDefault();
         const username = document.getElementById('newStaffUser').value.trim();
         const password = document.getElementById('newStaffPass').value.trim();
-        db.ref('staff/' + username).set({ username, password });
+        db.ref('staff/' + username).set({ username, password, balance: 0 });
         document.getElementById('addStaffForm').reset();
     }
 
@@ -1652,6 +1846,10 @@
         const staticId = document.getElementById('clientStaticId').value;
         const chargeDestination = document.querySelector('input[name="chargeDestination"]:checked').value;
         const amount = parseFloat(document.getElementById('chargeAmount').value);
+        if (!amount || amount <= 0) { alert('❌ يرجى إدخال مبلغ صحيح!'); return; }
+        const staff = staffAccounts.find(s => s.username === currentLoggedStaff);
+        const staffBalance = staff ? (staff.balance || 0) : 0;
+        if (staffBalance < amount) { alert('❌ رصيدك غير كافٍ! الرصيد المتاح: ' + staffBalance.toFixed(2) + ' $'); return; }
         let finalChargedId = staticId;
         if (chargeDestination === 'other') finalChargedId = document.getElementById('otherTargetId').value.trim();
         const now = new Date();
@@ -1680,6 +1878,9 @@
             sendTelegramToAllActiveBots(msg);
             alert('تم الشحن وتوثيق الحركة في ملف إكسل العميل المخصص!');
             document.getElementById('chargeAmount').value = "";
+            return deductStaffBalance(amount);
+        }).then(() => {
+            updateStaffBalanceUI();
         }).catch(err => { alert('❌ خطأ: ' + err.message); });
     }
 
@@ -1767,6 +1968,10 @@
         if (overlay) overlay.addEventListener('click', function(e) { if (e.target === this) cancelDelete(); });
         const balanceOverlay = document.getElementById('balanceModalOverlay');
         if (balanceOverlay) balanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeBalanceModal(); });
+        const editBalanceOverlay = document.getElementById('editBalanceModalOverlay');
+        if (editBalanceOverlay) editBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeEditBalanceModal(); });
+        const staffBalanceOverlay = document.getElementById('staffBalanceModalOverlay');
+        if (staffBalanceOverlay) staffBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffBalanceModal(); });
     });
 </script>
 </body>
