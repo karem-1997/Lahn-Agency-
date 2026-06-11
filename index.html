@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ali Recharge | نظام الشحن المتكامل</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0a0a; --card-bg: rgba(20,20,20,0.7); --primary-color: #ff1a1a;
+            --primary-light: #ff3333; --primary-dark: #cc0000; --accent-gold: #ffd700;
+            --accent-blue: #0088cc; --accent-green: #00cc66; --accent-purple: #9b59b6;
+            --text-color: #ffffff; --text-secondary: #b3b3b3; --text-muted: #666666;
+            --input-bg: rgba(30,30,30,0.8); --border-color: rgba(255,26,26,0.3);
+            --glass-bg: rgba(255,255,255,0.05); --glass-border: rgba(255,26,26,0.2);
+            --success-color: #00cc66; --warning-color: #ff9500; --danger-color: #ff4444;
+            --shadow-glow: 0 0 30px rgba(255,26,26,0.15); --shadow-card: 0 8px 32px rgba(0,0,0,0.6);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo','Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+        body {
+            background: linear-gradient(135deg,#0a0a0a 0%,#1a0000 30%,#0d0d1a 60%,#0a0a0a 100%);
+            background-attachment: fixed; color: var(--text-color); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; min-height: 100vh; padding: 10px;
+            position: relative; overflow-x: hidden;
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 50%,rgba(255,26,26,0.12) 0%,transparent 50%),
+                radial-gradient(circle at 80% 80%,rgba(155,89,182,0.08) 0%,transparent 50%),
+                radial-gradient(circle at 40% 20%,rgba(0,136,204,0.06) 0%,transparent 50%);
+            pointer-events: none; z-index: -1; animation: bgPulse 10s ease-in-out infinite;
+        }
+        @keyframes bgPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; }
+        .particle { position: absolute; width: 4px; height: 4px; background: var(--primary-color); border-radius: 50%; opacity: 0.3; animation: float 15s infinite; }
+        @keyframes float { 0%,100%{transform:translateY(100vh) rotate(0deg);opacity:0} 10%{opacity:0.3} 90%{opacity:0.3} 100%{transform:translateY(-100vh) rotate(720deg);opacity:0} }
+        .admin-gear-container { position: fixed; top: 15px; left: 15px; background: var(--glass-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); padding: 10px 16px; border-radius: 25px; cursor: pointer; display: flex; align-items: center; gap: 8px; z-index: 1000; color: var(--primary-color); font-weight: 700; font-size: 13px; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 4px 15px rgba(255,26,26,0.2); }
+        .admin-gear-container:hover { background: rgba(255,26,26,0.2); color: #fff; transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(255,26,26,0.4); border-color: var(--primary-color); }
+        .admin-gear-container span { font-size: 18px; animation: gearSpin 4s linear infinite; display: inline-block; }
+        @keyframes gearSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        .container { width: 100%; max-width: 900px; background: var(--card-bg); backdrop-filter: blur(20px); padding: 25px; border-radius: 24px; border: 1px solid var(--glass-border); box-shadow: var(--shadow-card), var(--shadow-glow), inset 0 1px 0 rgba(255,255,255,0.1); margin-top: 60px; position: relative; overflow: hidden; transition: transform 0.3s ease,box-shadow 0.3s ease; }
+        .container:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 80px rgba(255,26,26,0.15), inset 0 1px 0 rgba(255,255,255,0.15); }
+        .container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg,transparent,var(--primary-color),var(--accent-gold),var(--primary-color),transparent); animation: borderGlow 3s ease-in-out infinite; }
+        @keyframes borderGlow { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        h2,h3 { text-align: center; margin-bottom: 20px; color: var(--primary-color); text-shadow: 0 0 20px rgba(255,26,26,0.5); position: relative; font-weight: 800; }
+        h2 { font-size: 24px; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; letter-spacing: 1px; }
+        h2::after { content: ''; position: absolute; bottom: -1px; left: 25%; right: 25%; height: 2px; background: linear-gradient(90deg,transparent,var(--primary-color),transparent); }
+        h3 { font-size: 20px; }
+        .form-page { display: none; }
+        .form-page.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-size: 13px; font-weight: 600; transition: color 0.3s ease; }
+        .form-group:focus-within label { color: var(--primary-color); }
+        input[type="text"],input[type="password"],input[type="number"],input[type="date"],input[type="url"],select { width: 100%; padding: 14px; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text-color); font-size: 15px; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); backdrop-filter: blur(10px); }
+        input:focus,select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 20px rgba(255,26,26,0.3), inset 0 1px 0 rgba(255,255,255,0.1); transform: translateY(-2px); }
+        input:hover,select:hover { border-color: rgba(255,26,26,0.5); }
+        input[type="date"] { color-scheme: dark; }
+        .flex-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .flex-group > * { flex: 1; min-width: 120px; }
+        button { width: 100%; padding: 14px; background: linear-gradient(135deg,var(--primary-color),var(--primary-dark)); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; position: relative; overflow: hidden; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 4px 15px rgba(255,26,26,0.3); text-transform: uppercase; letter-spacing: 1px; }
+        button::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent); transition: left 0.5s ease; }
+        button:hover { background: linear-gradient(135deg,var(--primary-light),var(--primary-color)); transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 30px rgba(255,26,26,0.5); }
+        button:hover::before { left: 100%; }
+        button:active { transform: translateY(-1px) scale(0.98); }
+        .btn-blue { background: linear-gradient(135deg,var(--primary-light),var(--primary-dark)) !important; color: #fff; }
+        .btn-blue:hover { background: linear-gradient(135deg,#ff4d4d,var(--primary-light)) !important; }
+        .btn-danger { background: linear-gradient(135deg,#cc0000,#990000) !important; color: #fff; padding: 8px 14px; font-size: 13px; width: auto; display: inline-block; margin: 2px; min-width: 70px; }
+        .btn-danger:hover { background: linear-gradient(135deg,#ff1a1a,#cc0000) !important; }
+        .btn-secondary { background: transparent; color: var(--text-secondary); border: 1px solid var(--glass-border); position: relative; overflow: hidden; }
+        .btn-secondary:hover { background: rgba(255,26,26,0.1); border-color: var(--primary-color); color: #fff; }
+        .btn-success { background: linear-gradient(135deg,var(--success-color),#00994d) !important; color: #fff; }
+        .btn-success:hover { background: linear-gradient(135deg,#00e676,var(--success-color)) !important; }
+        .btn-warning { background: linear-gradient(135deg,var(--warning-color),#ff5500) !important; color: #fff; }
+        .btn-warning:hover { background: linear-gradient(135deg,#ffb74d,var(--warning-color)) !important; }
+        .btn-copy { background: linear-gradient(135deg,#0088cc,#005580) !important; color: #fff; padding: 4px 10px; font-size: 11px; border-radius: 6px; border: none; cursor: pointer; width: auto; display: inline-block; margin: 0 4px; transition: all 0.3s ease; }
+        .btn-copy:hover { background: linear-gradient(135deg,#00aaff,#0088cc) !important; transform: scale(1.05); }
+        .btn-gold { background: linear-gradient(135deg,#ffd700,#ffaa00) !important; color: #000; font-weight: 700; }
+        .btn-gold:hover { background: linear-gradient(135deg,#ffec8b,#ffd700) !important; }
+        .badge { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px dashed var(--primary-color); padding: 14px; border-radius: 12px; margin-bottom: 20px; text-align: center; color: var(--primary-color); font-weight: 700; animation: pulseBadge 2s ease-in-out infinite; box-shadow: 0 0 20px rgba(255,26,26,0.1); font-size: 14px; }
+        @keyframes pulseBadge { 0%,100%{box-shadow:0 0 20px rgba(255,26,26,0.1)} 50%{box-shadow:0 0 30px rgba(255,26,26,0.3)} }
+        .box-light { background: var(--glass-bg); backdrop-filter: blur(15px); padding: 18px; border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 15px; transition: all 0.3s ease; }
+        .box-light:hover { border-color: rgba(255,26,26,0.4); box-shadow: 0 4px 20px rgba(255,26,26,0.1); }
+        .radio-box { display: flex; gap: 10px; background: var(--input-bg); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); flex-wrap: wrap; }
+        .radio-box label { cursor: pointer; display: flex; align-items: center; gap: 6px; color: #fff; padding: 8px 14px; border-radius: 10px; transition: all 0.3s ease; border: 1px solid transparent; font-size: 14px; flex: 1; min-width: 100px; justify-content: center; }
+        .radio-box label:hover { background: rgba(255,26,26,0.1); border-color: var(--glass-border); }
+        .radio-box input[type="radio"] { accent-color: var(--primary-color); width: 16px; height: 16px; cursor: pointer; }
+        .search-container { background: var(--glass-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); padding: 18px; border-radius: 16px; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .search-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,transparent,var(--primary-color),transparent); }
+        .search-result-box { margin-top: 12px; padding: 14px; background: rgba(0,0,0,0.5); border-radius: 12px; display: none; border-right: 4px solid var(--success-color); backdrop-filter: blur(10px); animation: slideIn 0.4s ease; }
+        @keyframes slideIn { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+        .search-result-box h4 { color: var(--primary-color); margin-bottom: 10px; font-size: 16px; }
+        .search-result-box .summary-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px; }
+        .search-result-box .summary-row:last-child { border-bottom: none; }
+        .search-result-box .summary-row strong { color: var(--text-secondary); }
+        .search-result-box .summary-row span { color: var(--primary-color); font-weight: 700; }
+        .search-result-box .log-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+        .search-result-box .log-table th { background: rgba(255,26,26,0.2); color: var(--primary-color); padding: 10px; text-align: center; border: 1px solid var(--glass-border); }
+        .search-result-box .log-table td { padding: 8px; text-align: center; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.03); }
+        .search-result-box .log-table tr:hover td { background: rgba(255,26,26,0.05); }
+        .search-result-box .no-logs { text-align: center; color: var(--text-secondary); padding: 20px; font-style: italic; }
+        .download-btn { background: linear-gradient(135deg,var(--success-color),#00994d) !important; color: #fff; padding: 10px 16px; font-size: 13px; border-radius: 8px; border: none; cursor: pointer; margin-top: 12px; width: auto; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,204,102,0.3); }
+        .download-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(0,204,102,0.5); }
+        .download-section { text-align: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .admin-download-btn { background: linear-gradient(135deg,#ff9500,#ff5500) !important; color: #fff; padding: 10px 18px; font-size: 13px; border-radius: 8px; border: none; cursor: pointer; margin-bottom: 12px; width: auto; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255,149,0,0.3); }
+        .admin-download-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(255,149,0,0.5); }
+        .date-filter-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .date-filter-row .form-group { flex: 1; min-width: 120px; margin-bottom: 0; }
+        .date-filter-row label { font-size: 11px; margin-bottom: 4px; }
+        .date-filter-row input[type="date"] { padding: 8px; font-size: 13px; }
+        .admin-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; border-radius: 12px; overflow: hidden; font-size: 14px; }
+        .admin-table th,.admin-table td { border: 1px solid var(--glass-border); padding: 10px 8px; text-align: center; transition: all 0.3s ease; }
+        .admin-table th { background: rgba(255,26,26,0.15); color: var(--primary-color); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; }
+        .admin-table tr { transition: all 0.3s ease; }
+        .admin-table tr:hover { background: rgba(255,26,26,0.05); }
+        .admin-table td { background: var(--glass-bg); font-size: 13px; }
+        .admin-table td:last-child { min-width: 160px; white-space: nowrap; text-align: center; }
+        .admin-table td:last-child button { display: inline-block !important; visibility: visible !important; opacity: 1 !important; margin: 2px; padding: 6px 10px; font-size: 12px; min-width: 65px; }
+        .excel-box { margin-top: 20px; border: 2px solid var(--primary-color); border-radius: 16px; overflow: hidden; background: #fff; display: none; box-shadow: 0 0 30px rgba(255,26,26,0.2); }
+        .excel-box iframe { width: 100%; height: 350px; border: none; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-light); }
+        .delete-log-btn { background: linear-gradient(135deg,#ff4444,#cc0000) !important; color: #fff; padding: 4px 8px; font-size: 11px; border-radius: 6px; border: none; cursor: pointer; width: auto; margin: 0; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(255,68,68,0.3); display: inline-block; }
+        .delete-log-btn:hover { background: linear-gradient(135deg,#ff6666,#ff3333) !important; transform: scale(1.05); box-shadow: 0 4px 12px rgba(255,68,68,0.5); }
+        .delete-log-btn:disabled { background: #555 !important; cursor: not-allowed; transform: none; box-shadow: none; }
+        .delete-confirm-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; }
+        .delete-confirm-box { background: var(--card-bg); border: 2px solid var(--primary-color); border-radius: 24px; padding: 30px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 0 50px rgba(255,26,26,0.3); animation: popIn 0.3s ease; }
+        @keyframes popIn { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+        .delete-confirm-box h3 { color: var(--primary-color); margin-bottom: 14px; font-size: 18px; }
+        .delete-confirm-box p { color: var(--text-secondary); margin-bottom: 20px; line-height: 1.7; font-size: 14px; }
+        .delete-confirm-box .confirm-buttons { display: flex; gap: 10px; }
+        .delete-confirm-box button { flex: 1; margin: 0; padding: 12px; font-size: 14px; }
+        .btn-cancel { background: transparent !important; border: 1px solid var(--glass-border) !important; color: var(--text-secondary) !important; }
+        .btn-cancel:hover { background: rgba(255,255,255,0.1) !important; color: #fff !important; }
+        .btn-confirm-delete { background: linear-gradient(135deg,#ff4444,#cc0000) !important; }
+        .btn-confirm-delete:hover { background: linear-gradient(135deg,#ff6666,#ff3333) !important; }
+        .user-portal-badge { background: linear-gradient(135deg,rgba(0,204,102,0.2),rgba(0,153,77,0.2)); border: 1px dashed var(--success-color); color: var(--success-color); }
+        .balance-display { background: linear-gradient(135deg,rgba(0,204,102,0.15),rgba(0,153,77,0.15)); border: 2px solid var(--success-color); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 18px; position: relative; overflow: hidden; }
+        .balance-display::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg,transparent,rgba(0,204,102,0.05),transparent); animation: shimmer 3s ease-in-out infinite; }
+        @keyframes shimmer { 0%{transform:translateX(-100%) translateY(-100%)} 100%{transform:translateX(100%) translateY(100%)} }
+        .balance-display .balance-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; position: relative; z-index: 1; }
+        .balance-display .balance-value { font-size: 36px; font-weight: 800; color: var(--success-color); text-shadow: 0 0 20px rgba(0,204,102,0.5); position: relative; z-index: 1; }
+        .balance-display .balance-currency { font-size: 16px; color: var(--text-secondary); position: relative; z-index: 1; }
+        .balance-display .balance-icon { font-size: 24px; margin-bottom: 4px; position: relative; z-index: 1; }
+        .debt-display { background: linear-gradient(135deg,rgba(255,26,26,0.15),rgba(204,0,0,0.15)); border: 2px solid var(--primary-color); border-radius: 16px; padding: 18px; text-align: center; margin-bottom: 18px; }
+        .debt-display .debt-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+        .debt-display .debt-value { font-size: 32px; font-weight: 700; color: var(--primary-color); text-shadow: 0 0 20px rgba(255,26,26,0.5); }
+        .debt-display .debt-currency { font-size: 16px; color: var(--text-secondary); }
+        .status-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .status-pending { background: rgba(255,149,0,0.2); border: 1px solid var(--warning-color); color: var(--warning-color); animation: pulsePending 1.5s ease-in-out infinite; }
+        @keyframes pulsePending { 0%,100%{box-shadow:0 0 5px rgba(255,149,0,0.3)} 50%{box-shadow:0 0 15px rgba(255,149,0,0.6)} }
+        .status-completed { background: rgba(0,204,102,0.2); border: 1px solid var(--success-color); color: var(--success-color); }
+        .status-rejected { background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; }
+        .user-orders-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; border-radius: 12px; overflow: hidden; font-size: 13px; }
+        .user-orders-table th,.user-orders-table td { border: 1px solid var(--glass-border); padding: 10px 6px; text-align: center; }
+        .user-orders-table th { background: rgba(255,26,26,0.15); color: var(--primary-color); font-weight: 700; font-size: 12px; }
+        .user-orders-table tr:hover { background: rgba(255,26,26,0.05); }
+        .user-orders-table td { background: var(--glass-bg); font-size: 12px; }
+        .notifications-panel { position: fixed; top: 70px; right: 15px; width: 340px; max-height: 450px; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 16px; padding: 14px; z-index: 2000; display: none; box-shadow: 0 8px 32px rgba(0,0,0,0.6); overflow-y: auto; }
+        .notifications-panel.active { display: block; animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+        .notifications-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--glass-border); }
+        .notifications-header h4 { color: var(--primary-color); font-size: 14px; }
+        .notification-count { background: var(--primary-color); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+        .notification-item { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; margin-bottom: 10px; transition: all 0.3s ease; }
+        .notification-item:hover { border-color: var(--primary-color); background: rgba(255,26,26,0.05); }
+        .notification-item .notif-title { font-weight: 700; color: var(--primary-color); font-size: 13px; margin-bottom: 6px; }
+        .notification-item .notif-details { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.6; }
+        .notification-item .notif-actions { display: flex; gap: 6px; }
+        .notification-item .notif-actions button { flex: 1; margin: 0; padding: 8px; font-size: 12px; }
+        .notif-bell { position: fixed; top: 15px; right: 15px; background: var(--glass-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); padding: 10px 16px; border-radius: 25px; cursor: pointer; z-index: 1000; display: none; align-items: center; gap: 6px; color: var(--primary-color); font-weight: 700; font-size: 13px; transition: all 0.3s ease; }
+        .notif-bell:hover { background: rgba(255,26,26,0.2); transform: scale(1.05); }
+        .notif-bell .bell-icon { font-size: 20px; animation: bellShake 2s ease-in-out infinite; }
+        @keyframes bellShake { 0%,100%{transform:rotate(0deg)} 10%{transform:rotate(15deg)} 20%{transform:rotate(-15deg)} 30%{transform:rotate(10deg)} 40%{transform:rotate(-10deg)} 50%{transform:rotate(5deg)} 60%{transform:rotate(-5deg)} 70%{transform:rotate(0deg)} }
+        .notif-bell .notif-badge { position: absolute; top: -6px; right: -6px; background: var(--primary-color); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+        .login-type-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+        .login-type-btn { flex: 1; padding: 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text-secondary); cursor: pointer; text-align: center; transition: all 0.3s ease; font-weight: 700; font-size: 15px; }
+        .login-type-btn:hover { border-color: var(--primary-color); color: #fff; }
+        .login-type-btn.active { background: linear-gradient(135deg,var(--primary-color),var(--primary-dark)); color: #fff; border-color: var(--primary-color); box-shadow: 0 4px 15px rgba(255,26,26,0.3); }
+        .user-request-form { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; margin-bottom: 18px; }
+        .user-request-form h4 { color: var(--primary-color); margin-bottom: 14px; text-align: center; font-size: 17px; font-weight: 700; }
+        .empty-state { text-align: center; padding: 35px 15px; color: var(--text-secondary); }
+        .empty-state .empty-icon { font-size: 48px; margin-bottom: 14px; opacity: 0.5; }
+        .empty-state p { font-size: 14px; }
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -5px; padding: 0 5px; }
+        .table-wrapper::-webkit-scrollbar { height: 4px; }
+        .table-wrapper::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 2px; }
+        /* ====== APPS GRID ====== */
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 14px; margin: 20px 0; }
+        .app-card { background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 16px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; }
+        .app-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg,rgba(255,26,26,0.1),transparent); opacity: 0; transition: opacity 0.3s ease; }
+        .app-card:hover { border-color: var(--primary-color); transform: translateY(-5px) scale(1.05); box-shadow: 0 10px 30px rgba(255,26,26,0.2); }
+        .app-card:hover::before { opacity: 1; }
+        .app-card.selected { border-color: var(--success-color); box-shadow: 0 0 20px rgba(0,204,102,0.3); background: rgba(0,204,102,0.1); }
+        .app-card.selected::after { content: '✓'; position: absolute; top: 6px; right: 6px; background: var(--success-color); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+        .app-card .app-icon { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.3s ease; }
+        .app-card:hover .app-icon { transform: scale(1.1); }
+        .app-card .app-name { font-size: 12px; font-weight: 700; color: var(--text-color); margin-bottom: 2px; position: relative; z-index: 1; }
+        .app-card .app-desc { font-size: 10px; color: var(--text-secondary); position: relative; z-index: 1; }
+        .app-card.inactive { opacity: 0.4; pointer-events: none; filter: grayscale(100%); }
+        .section-title { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--glass-border); }
+        .section-title h3 { margin: 0; font-size: 17px; text-align: right; }
+        .section-title .section-icon { font-size: 22px; }
+        /* ====== ADMIN APPS SECTION ====== */
+        .admin-apps-section { border: 1px solid var(--accent-purple); margin-top: 20px; position: relative; overflow: hidden; }
+        .admin-apps-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,transparent,var(--accent-purple),#c39bd3,var(--accent-purple),transparent); animation: borderGlow 3s ease-in-out infinite; }
+        .admin-apps-section h3 { color: var(--accent-purple); font-size: 16px; margin-bottom: 15px; }
+        .app-admin-card { background: rgba(155,89,182,0.05); border: 1px solid rgba(155,89,182,0.3); border-radius: 14px; padding: 14px; margin-bottom: 12px; transition: all 0.3s ease; display: flex; align-items: center; gap: 14px; }
+        .app-admin-card:hover { border-color: var(--accent-purple); background: rgba(155,89,182,0.1); }
+        .app-admin-card .app-admin-icon { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .app-admin-card .app-admin-info { flex: 1; }
+        .app-admin-card .app-admin-name { font-weight: 700; color: var(--text-color); font-size: 14px; }
+        .app-admin-card .app-admin-desc { font-size: 11px; color: var(--text-secondary); }
+        .app-admin-card .app-admin-actions { display: flex; gap: 6px; }
+        .app-admin-card .app-admin-actions button { margin: 0; padding: 6px 12px; font-size: 11px; min-width: auto; width: auto; }
+        .add-app-form { background: rgba(155,89,182,0.05); border: 1px dashed rgba(155,89,182,0.4); border-radius: 14px; padding: 18px; margin-top: 15px; }
+        .add-app-form h4 { color: var(--accent-purple); font-size: 15px; margin-bottom: 14px; text-align: center; font-weight: 700; }
+        .add-app-form .form-group { margin-bottom: 12px; }
+        .add-app-form label { font-size: 12px; }
+        .add-app-form input { padding: 10px; font-size: 13px; }
+        .no-apps-msg { text-align: center; padding: 25px; color: var(--text-secondary); font-size: 14px; }
+        /* Balance Modal */
+        .balance-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; }
+        .balance-modal-box { background: var(--card-bg); border: 2px solid var(--success-color); border-radius: 24px; padding: 30px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 0 50px rgba(0,204,102,0.3); animation: popIn 0.3s ease; }
+        .balance-modal-box h3 { color: var(--success-color); margin-bottom: 8px; font-size: 18px; }
+        .balance-modal-box .user-info { color: var(--text-secondary); margin-bottom: 18px; font-size: 14px; }
+        .balance-modal-box .current-balance { background: rgba(0,204,102,0.1); border: 1px solid var(--success-color); border-radius: 12px; padding: 12px; margin-bottom: 18px; }
+        .balance-modal-box .current-balance .label { font-size: 12px; color: var(--text-secondary); }
+        .balance-modal-box .current-balance .value { font-size: 28px; font-weight: 700; color: var(--success-color); }
+        .balance-modal-box .confirm-buttons { display: flex; gap: 10px; }
+        .balance-modal-box button { flex: 1; margin: 0; padding: 12px; font-size: 14px; }
+        /* Toast */
+        .toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--success-color); color: #fff; padding: 12px 24px; border-radius: 12px; font-size: 14px; z-index: 10000; animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards; box-shadow: 0 4px 20px rgba(0,204,102,0.4); font-weight: 600; }
+        @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+        @keyframes toastOut { from{opacity:1} to{opacity:0} }
+        /* Selected App Info */
+        .selected-app-info { background: linear-gradient(135deg,rgba(0,204,102,0.1),rgba(0,153,77,0.1)); border: 1px solid var(--success-color); border-radius: 12px; padding: 12px; margin-bottom: 16px; display: none; align-items: center; gap: 12px; }
+        .selected-app-info.active { display: flex; }
+        .selected-app-info img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
+        .selected-app-info .info-text { flex: 1; }
+        .selected-app-info .info-text .name { font-weight: 700; color: var(--success-color); font-size: 14px; }
+        .selected-app-info .info-text .desc { font-size: 11px; color: var(--text-secondary); }
+        /* Insufficient Balance */
+        .insufficient-balance { background: linear-gradient(135deg,rgba(255,68,68,0.15),rgba(204,0,0,0.15)); border: 1px solid var(--danger-color); border-radius: 12px; padding: 14px; margin-bottom: 16px; display: none; text-align: center; }
+        .insufficient-balance.active { display: block; animation: shake 0.5s ease; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+        .insufficient-balance .warning-icon { font-size: 28px; margin-bottom: 6px; }
+        .insufficient-balance .warning-text { color: var(--danger-color); font-weight: 700; font-size: 14px; }
+        .insufficient-balance .warning-sub { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
+        /* Telegram */
+        .telegram-bots-section { border: 1px solid var(--accent-blue); margin-top: 20px; position: relative; overflow: hidden; }
+        .telegram-bots-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,transparent,var(--accent-blue),#00aaff,var(--accent-blue),transparent); animation: borderGlow 3s ease-in-out infinite; }
+        .telegram-bots-section h3 { color: var(--accent-blue); font-size: 16px; margin-bottom: 15px; }
+        .telegram-bot-card { background: rgba(0,136,204,0.05); border: 1px solid rgba(0,136,204,0.3); border-radius: 14px; padding: 14px; margin-bottom: 12px; transition: all 0.3s ease; }
+        .telegram-bot-card:hover { border-color: var(--accent-blue); background: rgba(0,136,204,0.1); }
+        .telegram-bot-card .bot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .telegram-bot-card .bot-name { color: #00aaff; font-weight: 700; font-size: 14px; }
+        .telegram-bot-card .bot-actions { display: flex; gap: 6px; }
+        .telegram-bot-card .bot-actions button { margin: 0; padding: 5px 10px; font-size: 11px; min-width: auto; width: auto; }
+        .telegram-bot-card .bot-info { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+        .telegram-bot-card .bot-info strong { color: var(--accent-blue); }
+        .telegram-bot-card .bot-status { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+        .bot-status-active { background: rgba(0,204,102,0.2); border: 1px solid var(--success-color); color: var(--success-color); }
+        .bot-status-inactive { background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; }
+        .add-bot-form { background: rgba(0,136,204,0.05); border: 1px dashed rgba(0,136,204,0.4); border-radius: 14px; padding: 18px; margin-top: 15px; }
+        .add-bot-form h4 { color: var(--accent-blue); font-size: 15px; margin-bottom: 14px; text-align: center; font-weight: 700; }
+        .bot-selector-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+        .bot-selector-row select { flex: 2; }
+        .bot-selector-row button { flex: 1; margin: 0; padding: 10px; font-size: 12px; }
+        .bot-test-result { padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-top: 10px; text-align: center; display: none; font-weight: 600; }
+        .bot-test-success { background: rgba(0,204,102,0.2); border: 1px solid var(--success-color); color: var(--success-color); }
+        .bot-test-fail { background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff4444; }
+        .no-bots-msg { text-align: center; padding: 25px; color: var(--text-secondary); font-size: 14px; }
+        /* Responsive */
+        @media (max-width:600px) {
+            body{padding:8px} .container{padding:16px;margin-top:55px;border-radius:20px} h2{font-size:20px;padding-bottom:10px} h3{font-size:17px}
+            .admin-gear-container{top:8px;left:8px;padding:8px 12px;font-size:12px} .admin-gear-container span{font-size:16px}
+            .radio-box{flex-direction:column;gap:8px} .radio-box label{width:100%;justify-content:flex-start}
+            .date-filter-row{flex-direction:column} .date-filter-row .form-group{min-width:100%}
+            .flex-group{flex-direction:column} .flex-group > *{width:100%;min-width:100%}
+            .admin-table{font-size:12px} .admin-table th,.admin-table td{padding:8px 4px} .admin-table th{font-size:10px;letter-spacing:0}
+            .admin-table td{font-size:12px} .admin-table td:last-child{min-width:140px;padding:6px 4px}
+            .admin-table td:last-child button{padding:5px 8px;font-size:11px;min-width:55px;margin:1px}
+            button{padding:12px;font-size:14px} input,select{padding:12px;font-size:14px}
+            .badge{font-size:12px;padding:12px} .box-light{padding:14px} .search-container{padding:14px}
+            .user-request-form{padding:16px} .balance-display .balance-value{font-size:28px}
+            .debt-display .debt-value{font-size:26px} .notifications-panel{width:92%;right:4%;top:70px}
+            .notif-bell{top:10px;right:10px;padding:8px 12px;font-size:12px}
+            .apps-grid{grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:10px}
+            .app-card .app-icon{width:48px;height:48px} .app-card .app-name{font-size:11px}
+        }
+        @media (max-width:380px) {
+            .admin-table{font-size:11px} .admin-table th,.admin-table td{padding:6px 3px}
+            .admin-table td:last-child{min-width:120px} .admin-table td:last-child button{padding:4px 6px;font-size:10px;min-width:50px}
+            h2{font-size:17px} .container{padding:14px}
+            .apps-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+            .app-card{padding:10px 6px} .app-card .app-icon{width:40px;height:40px}
+        }
+    </style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div id="deleteConfirmOverlay" class="delete-confirm-overlay">
+    <div class="delete-confirm-box">
+        <h3>⚠️ تأكيد حذف الشحنة</h3>
+        <p id="deleteConfirmText">هل أنت متأكد من حذف هذه الشحنة؟<br>سيتم خصم المبلغ من المديونية وإرجاع عدد الشحنات.</p>
+        <div class="confirm-buttons">
+            <button class="btn-cancel" onclick="cancelDelete()">إلغاء</button>
+            <button class="btn-confirm-delete" onclick="confirmDelete()">نعم، احذف</button>
+        </div>
+    </div>
+</div>
+
+<div id="balanceModalOverlay" class="balance-modal-overlay">
+    <div class="balance-modal-box">
+        <h3>💰 إضافة رصيد</h3>
+        <div class="user-info" id="balanceModalUserInfo"></div>
+        <div class="current-balance">
+            <div class="label">الرصيد الحالي</div>
+            <div class="value" id="balanceModalCurrent">0.00 $</div>
+        </div>
+        <div class="form-group">
+            <label>المبلغ المراد إضافته</label>
+            <input type="number" id="balanceAddAmount" placeholder="0.00" min="0.01" step="0.01">
+        </div>
+        <div class="confirm-buttons">
+            <button class="btn-cancel" onclick="closeBalanceModal()">إلغاء</button>
+            <button class="btn-success" onclick="confirmAddBalance()">✅ إضافة الرصيد</button>
+        </div>
+    </div>
+</div>
+
+<div id="notifBell" class="notif-bell" onclick="toggleNotifications()">
+    <span class="bell-icon">🔔</span>
+    <span>الإشعارات</span>
+    <span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+</div>
+
+<div id="notificationsPanel" class="notifications-panel">
+    <div class="notifications-header">
+        <h4>📋 طلبات الشحن الجديدة</h4>
+        <span id="panelNotifCount" class="notification-count">0</span>
+    </div>
+    <div id="notificationsList"></div>
+</div>
+
+<div class="admin-gear-container" onclick="openAdminPanel()">
+    <span>⚙</span> <strong>لوحة المدير والـ Excel</strong>
+</div>
+
+<div class="container">
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="form-page active">
+        <h2>تسجيل الدخول</h2>
+        <div class="login-type-selector">
+            <div class="login-type-btn active" onclick="setLoginType('staff')" id="loginTypeStaff">👔 موظف</div>
+            <div class="login-type-btn" onclick="setLoginType('user')" id="loginTypeUser">👤 مستخدم</div>
+        </div>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label id="loginUserLabel">اسم الموظف</label>
+                <input type="text" id="loginUser" required placeholder="اسم المستخدم">
+            </div>
+            <div class="form-group">
+                <label>الباسورد</label>
+                <input type="password" id="loginPass" required placeholder="الباسورد">
+            </div>
+            <button type="submit">تسجيل الدخول</button>
+        </form>
+    </div>
+
+    <!-- STAFF DASHBOARD -->
+    <div id="dashboardPage" class="form-page">
+        <h2>لوحة العمليات الشحن [Ali Recharge Agency]</h2>
+        <div id="staffBadge" class="badge"></div>
+        <div class="search-container">
+            <label style="color: var(--primary-color); font-weight: bold;">🔍 فحص فوري للمديونيات والحساب:</label>
+            <div class="flex-group">
+                <input type="text" id="searchIdInput" placeholder="اكتب ID الوكيل أو المستخدم">
+                <button type="button" class="btn-blue" style="width: 100px; margin: 0;" onclick="lookupDebtById()">فحص</button>
+            </div>
+            <div class="date-filter-row">
+                <div class="form-group"><label>📅 من تاريخ:</label><input type="date" id="searchFromDate"></div>
+                <div class="form-group"><label>📅 إلى تاريخ:</label><input type="date" id="searchToDate"></div>
+            </div>
+            <div id="searchResult" class="search-result-box"></div>
+        </div>
+        <div class="flex-group" style="margin-bottom: 20px;">
+            <button type="button" class="btn-blue" onclick="showAddClientModal('وكيل')">+ إضافة وكيل جديد</button>
+            <button type="button" class="btn-blue" onclick="showAddClientModal('مستخدم')">+ إضافة مستخدم جديد</button>
+        </div>
+        <form id="shippingForm" onsubmit="handleShippingSubmit(event)">
+            <div class="form-group">
+                <label>الفئة المستهدفة</label>
+                <div class="radio-box">
+                    <label><input type="radio" name="targetType" value="وكيل" checked onchange="loadClientsDropdown()"> وكيل</label>
+                    <label><input type="radio" name="targetType" value="مستخدم" onchange="loadClientsDropdown()"> مستخدم</label>
+                </div>
+            </div>
+            <div class="form-group" style="border: 2px dashed var(--primary-color); padding: 12px; border-radius: 12px; background: rgba(255,26,26,0.05);">
+                <label style="color: var(--primary-color);">🔍 بحث سريع بالـ ID:</label>
+                <input type="text" id="idSearchInput" oninput="searchByIdDirectly()" placeholder="اكتب الـ ID هنا للبحث التلقائي">
+            </div>
+            <div class="form-group">
+                <label id="clientSelectLabel">اختر الاسم</label>
+                <select id="clientSelect" onchange="handleClientSelectChange()" required></select>
+            </div>
+            <div class="form-group">
+                <label>الـ ID (تلقائي)</label>
+                <input type="text" id="clientStaticId" readonly style="background: rgba(255,26,26,0.1); color: var(--primary-color); border-color: var(--primary-color);">
+            </div>
+            <div class="form-group">
+                <label>الشحن موجه لـ:</label>
+                <div class="radio-box">
+                    <label><input type="radio" name="chargeDestination" value="self" checked onchange="toggleDestField()"> لنفس الـ ID</label>
+                    <label><input type="radio" name="chargeDestination" value="other" onchange="toggleDestField()"> لـ ID آخر (للغير)</label>
+                </div>
+            </div>
+            <div id="otherIdGroup" class="form-group" style="display: none;">
+                <label>اكتب الـ ID المراد الشحن له (للغير)</label>
+                <input type="text" id="otherTargetId" placeholder="الـ ID البديل">
+            </div>
+            <div class="form-group">
+                <label>مبلغ الشحن</label>
+                <input type="number" id="chargeAmount" required placeholder="0.00" min="1">
+            </div>
+            <button type="submit">إرسال وتوثيق سحابي</button>
+            <button type="button" class="btn-secondary" onclick="logoutStaff()">تسجيل خروج</button>
+        </form>
+    </div>
+
+    <!-- USER PORTAL -->
+    <div id="userPortalPage" class="form-page">
+        <h2>🎯 بوابة المستخدم</h2>
+        <div id="userBadge" class="badge user-portal-badge"></div>
+
+        <div class="balance-display">
+            <div class="balance-icon">💎</div>
+            <div class="balance-label">الرصيد المتاح</div>
+            <div class="balance-value" id="userBalanceValue">0.00</div>
+            <div class="balance-currency">دولار أمريكي</div>
+        </div>
+
+        <div class="debt-display">
+            <div class="debt-label">💰 المديونية الحالية</div>
+            <div class="debt-value" id="userDebtValue">0.00</div>
+            <div class="debt-currency">دولار أمريكي</div>
+        </div>
+
+        <div class="box-light">
+            <div class="section-title">
+                <span class="section-icon">🎮</span>
+                <h3>اختر البرنامج / اللعبة</h3>
+            </div>
+            <div id="appsGrid" class="apps-grid">
+                <div class="empty-state">
+                    <div class="empty-icon">📱</div>
+                    <p>جاري تحميل البرامج المتاحة...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="selectedAppInfo" class="selected-app-info">
+            <img id="selectedAppIcon" src="" alt="">
+            <div class="info-text">
+                <div class="name" id="selectedAppName"></div>
+                <div class="desc" id="selectedAppDesc"></div>
+            </div>
+        </div>
+
+        <div id="insufficientBalance" class="insufficient-balance">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">الرصيد غير كافٍ!</div>
+            <div class="warning-sub">الرصيد المتاح أقل من المبلغ المطلوب. يرجى التواصل مع الإدارة لإضافة رصيد.</div>
+        </div>
+
+        <div class="user-request-form">
+            <h4>📤 تقديم طلب شحن جديد</h4>
+            <form id="userRequestForm" onsubmit="handleUserRequest(event)">
+                <div class="form-group">
+                    <label>الشحن موجه لـ:</label>
+                    <div class="radio-box">
+                        <label><input type="radio" name="userChargeDest" value="self" checked onchange="toggleUserDestField()"> لنفسي (<span id="userSelfIdDisplay"></span>)</label>
+                        <label><input type="radio" name="userChargeDest" value="other" onchange="toggleUserDestField()"> لـ ID آخر (للغير)</label>
+                    </div>
+                </div>
+                <div id="userOtherIdGroup" class="form-group" style="display: none;">
+                    <label>اكتب الـ ID المراد الشحن له</label>
+                    <input type="text" id="userOtherTargetId" placeholder="الـ ID البديل">
+                </div>
+                <div class="form-group">
+                    <label>مبلغ الشحن</label>
+                    <input type="number" id="userChargeAmount" required placeholder="0.00" min="1" oninput="checkBalance()">
+                </div>
+                <button type="submit" id="submitRequestBtn">🚀 إرسال الطلب</button>
+            </form>
+        </div>
+        <div class="box-light">
+            <div class="section-title">
+                <span class="section-icon">📋</span>
+                <h3>طلباتي</h3>
+            </div>
+            <div id="userOrdersContainer">
+                <div class="empty-state"><div class="empty-icon">📭</div><p>لا توجد طلبات حتى الآن</p></div>
+            </div>
+        </div>
+        <button type="button" class="btn-secondary" onclick="logoutUser()" style="margin-top: 20px;">تسجيل خروج</button>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanelPage" class="form-page">
+        <h2>لوحة السحاب السرية الإدارية</h2>
+
+        <div class="box-light" style="border: 1px solid var(--success-color);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;">نظام التسوية والمديونيات</h3>
+                <button class="admin-download-btn" onclick="downloadAllDebts()">📥 تحميل جميع المديونيات (PDF)</button>
+            </div>
+            <input type="text" id="adminSearchInput" placeholder="🔍 بحث بالاسم أو ID..." onkeyup="filterAdminTable()">
+            <div class="table-wrapper"><table class="admin-table">
+                <thead><tr><th>الاسم</th><th>ID</th><th>الفئة</th><th>المديونية</th><th>إجراء</th></tr></thead>
+                <tbody id="adminClientsTableBody"></tbody>
+            </table></div>
+        </div>
+
+        <div class="box-light" style="border: 1px solid var(--primary-color);">
+            <h3 style="font-size: 15px;">🔗 إعداد ربط وجلب وتحديث Google Sheets</h3>
+            <div class="form-group"><label>1. رابط الـ Web App:</label><input type="text" id="scriptUrlInput"></div>
+            <div class="form-group"><label>2. رابط الشيت الأساسي:</label><input type="text" id="sheetUrlInput"></div>
+            <button type="button" onclick="saveAdminSettings()">حفظ وإقران السحابة بالإكسل</button>
+        </div>
+
+        <div class="box-light admin-apps-section">
+            <div class="section-title">
+                <span class="section-icon">🎮</span>
+                <h3>إدارة برامج / ألعاب الشحن</h3>
+            </div>
+            <div id="adminAppsList"></div>
+            <div class="add-app-form">
+                <h4>➕ إضافة برنامج / لعبة جديدة</h4>
+                <div class="form-group">
+                    <label>🏷️ اسم البرنامج / اللعبة:</label>
+                    <input type="text" id="newAppName" placeholder="مثال: PUBG Mobile">
+                </div>
+                <div class="form-group">
+                    <label>🖼️ رابط صورة الأيقونة:</label>
+                    <input type="url" id="newAppIcon" placeholder="رابط الصورة (URL)">
+                </div>
+                <div class="form-group">
+                    <label>📝 وصف مختصر:</label>
+                    <input type="text" id="newAppDesc" placeholder="مثال: شحن UC - شحن فوري">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="newAppActive" checked style="width:auto; display:inline-block;">
+                        <span style="color: var(--text-secondary); font-size: 13px;">تفعيل البرنامج فور الإضافة</span>
+                    </label>
+                </div>
+                <button type="button" onclick="addApp()" style="background: linear-gradient(135deg, var(--accent-purple), #7d3c98) !important;">➕ إضافة البرنامج</button>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 12px; margin-top: 15px; text-align: center;">
+                💡 البرامج النشطة فقط تظهر للمستخدمين في بوابتهم<br>
+                ✅ المستخدم يختار البرنامج قبل تقديم طلب الشحن
+            </p>
+        </div>
+
+        <div class="box-light telegram-bots-section">
+            <h3>📱 إدارة بوتات Telegram (متعددة)</h3>
+            <div id="telegramBotsList"></div>
+            <div class="add-bot-form">
+                <h4>➕ إضافة بوت جديد</h4>
+                <div class="form-group">
+                    <label>🏷️ اسم البوت (للتعريف):</label>
+                    <input type="text" id="newBotName" placeholder="مثال: بوت الإشعارات الرئيسي">
+                </div>
+                <div class="form-group">
+                    <label>🔑 توكن البوت (Bot Token):</label>
+                    <input type="text" id="newBotToken" placeholder="مثال: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
+                </div>
+                <div class="form-group">
+                    <label>💬 ID الشات (Chat ID):</label>
+                    <input type="text" id="newBotChatId" placeholder="مثال: 123456789 أو -1001234567890">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="newBotActive" checked style="width:auto; display:inline-block;">
+                        <span style="color: var(--text-secondary); font-size: 13px;">تفعيل البوت فور الإضافة</span>
+                    </label>
+                </div>
+                <button type="button" onclick="addTelegramBot()" style="background: linear-gradient(135deg, #0088cc, #005580) !important;">➕ إضافة البوت</button>
+            </div>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(0, 136, 204, 0.2);">
+                <h4 style="color: #0088cc; font-size: 14px; margin-bottom: 10px; text-align: center;">🧪 اختبار بوت</h4>
+                <div class="bot-selector-row">
+                    <select id="testBotSelector"><option value="">-- اختر البوت --</option></select>
+                    <button type="button" onclick="testSelectedBot()" style="background: linear-gradient(135deg, #0088cc, #005580) !important;">🧪 اختبار</button>
+                </div>
+                <div id="botTestResult" class="bot-test-result"></div>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 12px; margin-top: 15px; text-align: center;">
+                💡 احصل على التوكن من @BotFather و ID الشات من @userinfobot<br>
+                ✅ جميع البوتات النشطة ستستقبل الإشعارات تلقائياً
+            </p>
+        </div>
+
+        <div id="excelBox" class="excel-box"><h3 style="color:#000; background:#f4f4f5; padding:10px; font-size:14px; text-align:right;">📊 لوحة مراقبة الحسابات:</h3><iframe id="excelIframe" src=""></iframe></div>
+
+        <div class="box-light" style="margin-top:20px;">
+            <h3>👔 إضافة موظف جديد</h3>
+            <form id="addStaffForm" onsubmit="handleCreateStaff(event)">
+                <div class="form-group"><label>اسم الموظف</label><input type="text" id="newStaffUser" required></div>
+                <div class="form-group"><label>باسورد</label><input type="text" id="newStaffPass" required></div>
+                <button type="submit" style="background: linear-gradient(135deg, var(--success-color), #00994d) !important; color: #fff;">تفعيل الموظف</button>
+            </form>
+        </div>
+
+        <h3 style="color: var(--primary-color); font-size: 16px; margin-top:15px;">الموظفون الحاليون:</h3>
+        <div class="table-wrapper"><table class="admin-table"><thead><tr><th>الموظف</th><th>الباسورد</th><th>إجراء</th></tr></thead><tbody id="staffTableBody"></tbody></table></div>
+
+        <div class="box-light" style="margin-top:20px; border: 1px solid var(--warning-color);">
+            <h3>👤 إنشاء حساب مستخدم جديد (للبوابة)</h3>
+            <form id="addUserAccountForm" onsubmit="handleCreateUserAccount(event)">
+                <div class="form-group"><label>الاسم الكامل</label><input type="text" id="newUserAccName" required placeholder="اسم المستخدم"></div>
+                <div class="form-group"><label>الـ ID الثابت</label><input type="text" id="newUserAccId" required placeholder="الـ ID الخاص بالمستخدم"></div>
+                <div class="form-group"><label>الباسورد</label><input type="text" id="newUserAccPass" required placeholder="باسورد المستخدم"></div>
+                <button type="submit" style="background: linear-gradient(135deg, var(--warning-color), #ff5500) !important; color: #fff;">🚀 إنشاء حساب المستخدم</button>
+            </form>
+        </div>
+
+        <h3 style="color: var(--warning-color); font-size: 16px; margin-top:15px;">حسابات المستخدمين (البوابة):</h3>
+        <div class="table-wrapper"><table class="admin-table"><thead><tr><th>الاسم</th><th>ID</th><th>الباسورد</th><th>الرصيد</th><th>المديونية</th><th>إجراء</th></tr></thead><tbody id="userAccountsTableBody"></tbody></table></div>
+
+        <button type="button" class="btn-secondary" onclick="backToLoginOrDash()" style="margin-top: 25px;">رجوع</button>
+    </div>
+
+    <!-- ADD CLIENT PAGE -->
+    <div id="addClientPage" class="form-page">
+        <h3 id="addClientTitle">إضافة في قاعدة البيانات</h3>
+        <div class="box-light">
+            <form id="addClientForm" onsubmit="handleSaveClient(event)">
+                <div class="form-group"><label>الاسم الكامل</label><input type="text" id="newClientName" required></div>
+                <div class="form-group"><label>الـ ID الثابت</label><input type="text" id="newClientId" required></div>
+                <button type="submit" style="background: linear-gradient(135deg, var(--success-color), #00994d) !important; color: #fff;">اعتماد العميل</button>
+                <button type="button" class="btn-secondary" onclick="backToDashboard()">إلغاء</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyC8IqvDg8bLt9jMHunHpOR56an-9-RH5GA",
+        authDomain: "karem997-6fb5d.firebaseapp.com",
+        databaseURL: "https://karem997-6fb5d-default-rtdb.firebaseio.com",
+        projectId: "karem997-6fb5d",
+        storageBucket: "karem997-6fb5d.firebasestorage.app",
+        messagingSenderId: "698895854114",
+        appId: "1:698895854114:web:788015801f0f81b9f2b87b",
+        measurementId: "G-CMTXN79VWM"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let staffAccounts = [], clientsDatabase = [], userAccounts = [];
+    let currentLoggedStaff = null, currentLoggedUser = null;
+    let currentAddingType = "وكيل";
+    let globalScriptUrl = "", globalSheetUrl = "";
+    let currentLoginType = 'staff';
+    let pendingNotifications = [];
+    let telegramBots = [];
+    let availableApps = [];
+    let selectedApp = null;
+    let currentBalanceTarget = null;
+
+    function createParticles() {
+        const container = document.getElementById('particles');
+        if (!container) return;
+        for (let i = 0; i < 30; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDelay = Math.random() * 15 + 's';
+            p.style.animationDuration = (10 + Math.random() * 10) + 's';
+            p.style.width = (2 + Math.random() * 4) + 'px';
+            p.style.height = p.style.width;
+            const colors = ['#ff1a1a', '#9b59b6', '#0088cc', '#ffd700'];
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            container.appendChild(p);
+        }
+    }
+    createParticles();
+
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => showToast('✅ تم النسخ!')).catch(() => fallbackCopy(text));
+        } else { fallbackCopy(text); }
+    }
+    function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        try { document.execCommand('copy'); showToast('✅ تم النسخ!'); }
+        catch (err) { showToast('❌ فشل النسخ'); }
+        document.body.removeChild(ta);
+    }
+    function showToast(msg) {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast'; toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 2500);
+    }
+
+    function setLoginType(type) {
+        currentLoginType = type;
+        document.querySelectorAll('.login-type-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('loginType' + (type === 'staff' ? 'Staff' : 'User')).classList.add('active');
+        const label = document.getElementById('loginUserLabel');
+        const input = document.getElementById('loginUser');
+        if (type === 'staff') { label.innerText = 'اسم الموظف'; input.placeholder = 'اسم الموظف'; }
+        else { label.innerText = 'اسم المستخدم'; input.placeholder = 'اسم المستخدم'; }
+    }
+
+    // ==================== APPS ====================
+    db.ref('apps').on('value', snapshot => {
+        availableApps = [];
+        snapshot.forEach(child => { let app = child.val(); app._key = child.key; availableApps.push(app); });
+        renderAppsGrid();
+        renderAdminAppsList();
+    });
+
+    function renderAppsGrid() {
+        const grid = document.getElementById('appsGrid');
+        if (!grid) return;
+        const activeApps = availableApps.filter(a => a.active !== false);
+        if (activeApps.length === 0) {
+            grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📱</div><p>لا توجد برامج متاحة حالياً</p></div>';
+            return;
+        }
+        const fallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%23333' width='56' height='56'/%3E%3Ctext fill='%23fff' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='20'%3E📱%3C/text%3E%3C/svg%3E";
+        let html = '';
+        activeApps.forEach(app => {
+            const isSelected = selectedApp && selectedApp._key === app._key;
+            const selectedClass = isSelected ? 'selected' : '';
+            html += '<div class="app-card ' + selectedClass + '" onclick="selectApp(\'' + app._key + '\')">';
+            html += '<img class="app-icon" src="' + (app.icon || fallbackImg) + '" alt="' + (app.name || '') + '" onerror="this.src=\'' + fallbackImg + '\'">';
+            html += '<div class="app-name">' + (app.name || 'بدون اسم') + '</div>';
+            html += '<div class="app-desc">' + (app.description || '') + '</div>';
+            html += '</div>';
+        });
+        grid.innerHTML = html;
+    }
+
+    function renderAdminAppsList() {
+        const container = document.getElementById('adminAppsList');
+        if (!container) return;
+        if (availableApps.length === 0) {
+            container.innerHTML = '<div class="no-apps-msg">📭 لا توجد برامج مضافة بعد<br>أضف برنامج جديد من الأسفل</div>';
+            return;
+        }
+        const fallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23333' width='48' height='48'/%3E%3Ctext fill='%23fff' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='16'%3E📱%3C/text%3E%3C/svg%3E";
+        let html = '';
+        availableApps.forEach(app => {
+            const statusClass = app.active !== false ? 'bot-status-active' : 'bot-status-inactive';
+            const statusText = app.active !== false ? '🟢 نشط' : '🔴 معطل';
+            html += '<div class="app-admin-card">';
+            html += '<img class="app-admin-icon" src="' + (app.icon || fallbackImg) + '" alt="" onerror="this.src=\'' + fallbackImg + '\'">';
+            html += '<div class="app-admin-info">';
+            html += '<div class="app-admin-name">' + (app.name || 'بدون اسم') + '</div>';
+            html += '<div class="app-admin-desc">' + (app.description || '') + '</div>';
+            html += '<span class="bot-status ' + statusClass + '" style="margin-top:6px;">' + statusText + '</span>';
+            html += '</div>';
+            html += '<div class="app-admin-actions">';
+            html += '<button class="btn-success" style="padding:6px 12px;font-size:11px;" onclick="toggleAppStatus(\'' + app._key + '\',' + (app.active === false) + ')">' + (app.active !== false ? '🔴 تعطيل' : '🟢 تفعيل') + '</button>';
+            html += '<button class="btn-danger" style="padding:6px 12px;font-size:11px;" onclick="deleteApp(\'' + app._key + '\',\'' + (app.name || '') + '\')">🗑️ حذف</button>';
+            html += '</div></div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function selectApp(key) {
+        const app = availableApps.find(a => a._key === key);
+        if (!app || app.active === false) return;
+        selectedApp = app;
+        renderAppsGrid();
+        const infoDiv = document.getElementById('selectedAppInfo');
+        const iconImg = document.getElementById('selectedAppIcon');
+        const nameDiv = document.getElementById('selectedAppName');
+        const descDiv = document.getElementById('selectedAppDesc');
+        if (infoDiv && iconImg && nameDiv && descDiv) {
+            infoDiv.classList.add('active');
+            iconImg.src = app.icon || '';
+            iconImg.onerror = function() { this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect fill='%23333' width='40' height='40'/%3E%3Ctext fill='%23fff' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='14'%3E📱%3C/text%3E%3C/svg%3E"; };
+            nameDiv.innerText = app.name || '';
+            descDiv.innerText = app.description || '';
+        }
+        showToast('✅ تم اختيار: ' + app.name);
+    }
+
+    function addApp() {
+        const name = document.getElementById('newAppName').value.trim();
+        const icon = document.getElementById('newAppIcon').value.trim();
+        const desc = document.getElementById('newAppDesc').value.trim();
+        const active = document.getElementById('newAppActive').checked;
+        if (!name) { alert('❌ يرجى إدخال اسم البرنامج!'); return; }
+        const appData = { name: name, icon: icon, description: desc, active: active, createdAt: new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US') };
+        db.ref('apps').push().set(appData)
+        .then(() => {
+            showToast('✅ تم إضافة البرنامج بنجاح!');
+            document.getElementById('newAppName').value = '';
+            document.getElementById('newAppIcon').value = '';
+            document.getElementById('newAppDesc').value = '';
+            document.getElementById('newAppActive').checked = true;
+        })
+        .catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
+    function deleteApp(key, name) {
+        if (!confirm('هل أنت متأكد من حذف البرنامج: ' + (name || 'بدون اسم') + '؟')) return;
+        db.ref('apps/' + key).remove().then(() => showToast('✅ تم حذف البرنامج')).catch(err => alert('❌ خطأ: ' + err.message));
+    }
+
+    function toggleAppStatus(key, newStatus) {
+        db.ref('apps/' + key).update({ active: newStatus }).then(() => {
+            showToast('✅ تم ' + (newStatus ? 'تفعيل' : 'تعطيل') + ' البرنامج');
+        }).catch(err => alert('❌ خطأ: ' + err.message));
+    }
+
+    // ==================== BALANCE ====================
+    function openBalanceModal(userKey, userName, currentBalance) {
+        currentBalanceTarget = userKey;
+        const overlay = document.getElementById('balanceModalOverlay');
+        const userInfo = document.getElementById('balanceModalUserInfo');
+        const currentBal = document.getElementById('balanceModalCurrent');
+        if (overlay && userInfo && currentBal) {
+            userInfo.innerText = 'المستخدم: ' + userName;
+            currentBal.innerText = (currentBalance || 0).toFixed(2) + ' $';
+            document.getElementById('balanceAddAmount').value = '';
+            overlay.style.display = 'flex';
+        }
+    }
+
+    function closeBalanceModal() {
+        currentBalanceTarget = null;
+        document.getElementById('balanceModalOverlay').style.display = 'none';
+    }
+
+    function confirmAddBalance() {
+        if (!currentBalanceTarget) { closeBalanceModal(); return; }
+        const amount = parseFloat(document.getElementById('balanceAddAmount').value);
+        if (!amount || amount <= 0) { alert('❌ يرجى إدخال مبلغ صحيح!'); return; }
+        const userRef = db.ref('user_accounts/' + currentBalanceTarget);
+        userRef.once('value').then(snap => {
+            const data = snap.val() || {};
+            const newBalance = (data.balance || 0) + amount;
+            return userRef.update({ balance: newBalance });
+        }).then(() => {
+            showToast('✅ تم إضافة ' + amount.toFixed(2) + ' $ للرصيد!');
+            closeBalanceModal();
+        }).catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
+    function checkBalance() {
+        if (!currentLoggedUser) return;
+        const amount = parseFloat(document.getElementById('userChargeAmount').value) || 0;
+        const balance = currentLoggedUser.balance || 0;
+        const warningDiv = document.getElementById('insufficientBalance');
+        const submitBtn = document.getElementById('submitRequestBtn');
+        if (amount > 0 && amount > balance) {
+            if (warningDiv) warningDiv.classList.add('active');
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
+        } else {
+            if (warningDiv) warningDiv.classList.remove('active');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; }
+        }
+    }
+
+    // ==================== TELEGRAM ====================
+    db.ref('telegram_bots').on('value', snapshot => {
+        telegramBots = [];
+        snapshot.forEach(child => { let bot = child.val(); bot._key = child.key; telegramBots.push(bot); });
+        renderTelegramBotsList();
+        updateTestBotSelector();
+    });
+
+    function renderTelegramBotsList() {
+        const container = document.getElementById('telegramBotsList');
+        if (!container) return;
+        if (telegramBots.length === 0) {
+            container.innerHTML = '<div class="no-bots-msg">📭 لا توجد بوتات مضافة بعد<br>أضف بوت جديد من الأسفل</div>';
+            return;
+        }
+        let html = '';
+        telegramBots.forEach(bot => {
+            const statusClass = bot.active ? 'bot-status-active' : 'bot-status-inactive';
+            const statusText = bot.active ? '🟢 نشط' : '🔴 معطل';
+            const tokenHidden = bot.token ? bot.token.substring(0, 10) + '...' + bot.token.substring(bot.token.length - 5) : '';
+            html += '<div class="telegram-bot-card">';
+            html += '<div class="bot-header">';
+            html += '<span class="bot-name">🤖 ' + (bot.name || 'بوت بدون اسم') + '</span>';
+            html += '<div class="bot-actions">';
+            html += '<button class="btn-success" style="padding:5px 10px;font-size:11px;" onclick="toggleBotStatus(\'' + bot._key + '\',' + (!bot.active) + ')">' + (bot.active ? '🔴 تعطيل' : '🟢 تفعيل') + '</button>';
+            html += '<button class="btn-danger" style="padding:5px 10px;font-size:11px;" onclick="deleteTelegramBot(\'' + bot._key + '\',\'' + (bot.name || '') + '\')">🗑️ حذف</button>';
+            html += '</div></div>';
+            html += '<div class="bot-info">';
+            html += '<div><strong>🔑 التوكن:</strong> ' + tokenHidden + '</div>';
+            html += '<div><strong>💬 Chat ID:</strong> ' + (bot.chatId || 'غير محدد') + '</div>';
+            html += '</div>';
+            html += '<span class="bot-status ' + statusClass + '">' + statusText + '</span>';
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function updateTestBotSelector() {
+        const selector = document.getElementById('testBotSelector');
+        if (!selector) return;
+        selector.innerHTML = '<option value="">-- اختر البوت --</option>';
+        telegramBots.forEach(bot => {
+            const opt = document.createElement('option');
+            opt.value = bot._key;
+            opt.innerText = (bot.active ? '🟢 ' : '🔴 ') + (bot.name || 'بوت بدون اسم');
+            selector.appendChild(opt);
+        });
+    }
+
+    function addTelegramBot() {
+        const name = document.getElementById('newBotName').value.trim();
+        const token = document.getElementById('newBotToken').value.trim();
+        const chatId = document.getElementById('newBotChatId').value.trim();
+        const active = document.getElementById('newBotActive').checked;
+        if (!name || !token || !chatId) { alert('❌ يرجى ملء جميع الحقول!'); return; }
+        const duplicate = telegramBots.find(b => b.token === token);
+        if (duplicate) { alert('❌ هذا التوكن مستخدم بالفعل لبوت: ' + (duplicate.name || 'بدون اسم')); return; }
+        const botData = { name: name, token: token, chatId: chatId, active: active, createdAt: new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US') };
+        db.ref('telegram_bots').push().set(botData)
+        .then(() => { showToast('✅ تم إضافة البوت بنجاح!'); document.getElementById('newBotName').value = ''; document.getElementById('newBotToken').value = ''; document.getElementById('newBotChatId').value = ''; document.getElementById('newBotActive').checked = true; })
+        .catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
+    function deleteTelegramBot(key, name) {
+        if (!confirm('هل أنت متأكد من حذف البوت: ' + (name || 'بدون اسم') + '؟')) return;
+        db.ref('telegram_bots/' + key).remove().then(() => showToast('✅ تم حذف البوت')).catch(err => alert('❌ خطأ: ' + err.message));
+    }
+
+    function toggleBotStatus(key, newStatus) {
+        db.ref('telegram_bots/' + key).update({ active: newStatus }).then(() => { showToast('✅ تم ' + (newStatus ? 'تفعيل' : 'تعطيل') + ' البوت'); }).catch(err => alert('❌ خطأ: ' + err.message));
+    }
+
+    function testSelectedBot() {
+        const selector = document.getElementById('testBotSelector');
+        const resultDiv = document.getElementById('botTestResult');
+        const selectedKey = selector.value;
+        if (!selectedKey) { alert('❌ يرجى اختيار بوت أولاً!'); return; }
+        const bot = telegramBots.find(b => b._key === selectedKey);
+        if (!bot) return;
+        resultDiv.style.display = 'block'; resultDiv.className = 'bot-test-result'; resultDiv.innerText = '⏳ جاري الاختبار...';
+        const message = '🧪 *اختبار إشعار*\n\n✅ إعدادات البوت شغالة بنجاح!\n🤖 البوت: ' + (bot.name || 'بدون اسم') + '\n📅 ' + new Date().toLocaleString('ar-EG');
+        sendTelegramMessageToBot(bot, message, function(success) {
+            if (success) { resultDiv.className = 'bot-test-result bot-test-success'; resultDiv.innerText = '✅ نجح! تم إرسال رسالة الاختبار بنجاح.'; }
+            else { resultDiv.className = 'bot-test-result bot-test-fail'; resultDiv.innerText = '❌ فشل! تأكد من التوكن و Chat ID.'; }
+        });
+    }
+
+    function sendTelegramMessageToBot(bot, message, callback) {
+        if (!bot || !bot.token || !bot.chatId) { if (callback) callback(false); return; }
+        const url = 'https://api.telegram.org/bot' + bot.token + '/sendMessage';
+        const payload = { chat_id: bot.chatId, text: message, parse_mode: 'Markdown', disable_web_page_preview: true };
+        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(response => response.json()).then(data => { if (data.ok) { console.log('Telegram OK: ' + bot.name); if (callback) callback(true); } else { console.error('Telegram err: ' + bot.name, data); if (callback) callback(false); } })
+        .catch(err => { console.error('Telegram fetch err: ' + bot.name, err); if (callback) callback(false); });
+    }
+
+    function sendTelegramToAllActiveBots(message) {
+        const activeBots = telegramBots.filter(b => b.active);
+        if (activeBots.length === 0) { console.log('No active bots'); return; }
+        activeBots.forEach(bot => { sendTelegramMessageToBot(bot, message, function(success) { if (!success) console.warn('Failed: ' + bot.name); }); });
+    }
+
+    // ==================== LISTENERS ====================
+    db.ref('clients').on('value', snapshot => {
+        let tbody = document.getElementById('adminClientsTableBody');
+        if(!tbody) return;
+        tbody.innerHTML = "";
+        clientsDatabase = [];
+        snapshot.forEach(child => {
+            let cl = child.val(); cl._key = child.key; clientsDatabase.push(cl);
+            tbody.innerHTML += '<tr><td>' + cl.name + '</td><td>' + cl.id + '</td><td>' + (cl.type || 'وكيل') + '</td><td>' + (cl.debt || 0) + '$</td>' +
+            '<td><button class="btn-danger" style="padding:5px;background:var(--accent-blue);" onclick="settleDebt(&quot;' + child.key + '&quot;,&quot;' + cl.name + '&quot;)">تصفير</button>' +
+            '<button class="btn-danger" style="padding:5px;" onclick="deleteClient(&quot;' + child.key + '&quot;,&quot;' + cl.name + '&quot;)">حذف</button></td></tr>';
+        });
+    });
+
+    db.ref('user_accounts').on('value', snapshot => {
+        userAccounts = [];
+        let tbody = document.getElementById('userAccountsTableBody');
+        if(tbody) tbody.innerHTML = "";
+        snapshot.forEach(child => {
+            let ua = child.val(); ua._key = child.key; userAccounts.push(ua);
+            if(tbody) tbody.innerHTML += '<tr><td>' + ua.name + '</td><td>' + ua.id + '</td><td>' + ua.password + '</td><td style="color:var(--success-color);font-weight:700;">' + (ua.balance || 0) + '$</td><td>' + (ua.debt || 0) + '$</td>' +
+            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">💰 رصيد</button>' +
+            '<button class="btn-danger" style="padding:5px;font-size:11px;" onclick="deleteUserAccount(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">حذف</button></td></tr>';
+        });
+        if(currentLoggedUser) {
+            const updated = userAccounts.find(u => u._key === currentLoggedUser._key);
+            if(updated) { currentLoggedUser = updated; updateUserPortalUI(); }
+        }
+    });
+
+    db.ref('staff').on('value', snapshot => {
+        staffAccounts = [];
+        snapshot.forEach(child => { staffAccounts.push(child.val()); });
+        renderStaffTable();
+        if(staffAccounts.length === 0) db.ref('staff/كريم').set({ username: "كريم", password: "123" });
+    });
+
+    db.ref('settings').on('value', snapshot => {
+        const val = snapshot.val() || {};
+        globalScriptUrl = val.scriptUrl || "";
+        globalSheetUrl = val.sheetUrl || "";
+        const scriptInput = document.getElementById('scriptUrlInput');
+        const sheetInput = document.getElementById('sheetUrlInput');
+        if(scriptInput) scriptInput.value = globalScriptUrl;
+        if(sheetInput) sheetInput.value = globalSheetUrl;
+        const iframe = document.getElementById('excelIframe');
+        const box = document.getElementById('excelBox');
+        if(globalSheetUrl && iframe && box) { iframe.src = globalSheetUrl.includes("/edit") ? globalSheetUrl.split("/edit")[0] + "/edit?usp=sharing" : globalSheetUrl; box.style.display = "block"; }
+        else if(box) box.style.display = "none";
+    });
+
+    db.ref('user_requests').on('value', snapshot => {
+        pendingNotifications = [];
+        snapshot.forEach(child => { let req = child.val(); req._key = child.key; if(req.status === 'pending') pendingNotifications.push(req); });
+        updateNotificationBadge();
+    });
+
+    // ==================== NOTIFICATIONS ====================
+    function updateNotificationBadge() {
+        const bell = document.getElementById('notifBell');
+        const badge = document.getElementById('notifBadge');
+        const panelCount = document.getElementById('panelNotifCount');
+        const list = document.getElementById('notificationsList');
+        if(!bell || !badge) return;
+        if(currentLoggedStaff && pendingNotifications.length > 0) {
+            bell.style.display = 'flex';
+            badge.style.display = 'flex';
+            badge.innerText = pendingNotifications.length;
+            if(panelCount) panelCount.innerText = pendingNotifications.length;
+            if(list) {
+                list.innerHTML = '';
+                pendingNotifications.forEach(req => {
+                    const item = document.createElement('div');
+                    item.className = 'notification-item';
+                    const destText = req.destination === 'self' ? 'لنفسه' : 'للغير (' + req.targetId + ')';
+                    const appName = req.appName ? '🎮 ' + req.appName + '\n' : '';
+                    const copyText = 'ID: ' + req.userId + ' | المبلغ: ' + req.amount + ' $ | الوجهة: ' + destText;
+                    item.innerHTML = 
+                        '<div class="notif-title">🆕 طلب شحن جديد</div>' +
+                        '<div class="notif-details">' +
+                            'من: <strong>' + req.userName + '</strong><br>' +
+                            'ID: <strong style="color:var(--primary-color);">' + req.userId + '</strong>' +
+                            '<button class="btn-copy" onclick="copyToClipboard(\'' + req.userId + '\')">📋 نسخ</button><br>' +
+                            'المبلغ: <strong style="color:var(--primary-color);">' + req.amount + ' $</strong><br>' +
+                            (appName ? appName : '') +
+                            'الوجهة: ' + destText +
+                            '<button class="btn-copy" onclick="copyToClipboard(\'' + copyText + '\')">📋 نسخ الكل</button><br>' +
+                            'الوقت: ' + req.time +
+                        '</div>' +
+                        '<div class="notif-actions">' +
+                            '<button class="btn-success" onclick="approveUserRequest(\'' + req._key + '\')">✅ تم العمل</button>' +
+                            '<button class="btn-danger" onclick="rejectUserRequest(\'' + req._key + '\')">❌ رفض</button>' +
+                        '</div>';
+                    list.appendChild(item);
+                });
+            }
+        } else {
+            if(badge) badge.style.display = 'none';
+            if(list) list.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">لا توجد طلبات جديدة</div>';
+        }
+    }
+
+    function toggleNotifications() {
+        const panel = document.getElementById('notificationsPanel');
+        if(panel) panel.classList.toggle('active');
+    }
+
+    // ==================== USER REQUEST ====================
+    function handleUserRequest(event) {
+        event.preventDefault();
+        if(!currentLoggedUser) { alert("خطأ: لم يتم تسجيل الدخول!"); return; }
+        if (!selectedApp) { alert("❌ يرجى اختيار البرنامج / اللعبة أولاً!"); return; }
+        const chargeDest = document.querySelector('input[name="userChargeDest"]:checked').value;
+        const amount = parseFloat(document.getElementById('userChargeAmount').value);
+        const currentBalance = currentLoggedUser.balance || 0;
+        if (amount > currentBalance) { alert("❌ الرصيد غير كافٍ! الرصيد المتاح: " + currentBalance.toFixed(2) + " $"); return; }
+        let targetId = currentLoggedUser.id;
+        if(chargeDest === 'other') {
+            targetId = document.getElementById('userOtherTargetId').value.trim();
+            if(!targetId) { alert("يرجى كتابة الـ ID المراد الشحن له!"); return; }
+        }
+        const now = new Date();
+        const formattedTime = now.toLocaleDateString('en-US') + ', ' + now.toLocaleTimeString('en-US');
+        const requestData = { 
+            userName: currentLoggedUser.name, userId: currentLoggedUser.id, userKey: currentLoggedUser._key, 
+            amount: amount, destination: chargeDest, targetId: targetId, 
+            appKey: selectedApp._key, appName: selectedApp.name,
+            time: formattedTime, status: 'pending', staff: '' 
+        };
+        const userRef = db.ref('user_accounts/' + currentLoggedUser._key);
+        const newBalance = currentBalance - amount;
+        userRef.update({ balance: newBalance }).then(() => {
+            return db.ref('user_requests').push().set(requestData);
+        }).then(() => {
+            showToast('✅ تم إرسال طلب الشحن بنجاح!\nالرصيد المتبقي: ' + newBalance.toFixed(2) + ' $');
+            document.getElementById('userRequestForm').reset();
+            toggleUserDestField();
+            selectedApp = null;
+            renderAppsGrid();
+            const infoDiv = document.getElementById('selectedAppInfo');
+            if (infoDiv) infoDiv.classList.remove('active');
+            const warningDiv = document.getElementById('insufficientBalance');
+            if (warningDiv) warningDiv.classList.remove('active');
+            const submitBtn = document.getElementById('submitRequestBtn');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; }
+            loadUserOrders();
+            notifyNewRequest(requestData);
+        }).catch(err => { alert('❌ خطأ في الإرسال: ' + err.message); });
+    }
+
+    function approveUserRequest(requestKey) {
+        if(!currentLoggedStaff) { alert("يجب تسجيل دخول الموظف أولاً!"); return; }
+        const reqRef = db.ref('user_requests/' + requestKey);
+        let reqData = null;
+        reqRef.once('value').then(snapshot => {
+            reqData = snapshot.val();
+            if(!reqData || reqData.status !== 'pending') return;
+            return reqRef.update({ status: 'completed', staff: currentLoggedStaff, processedTime: new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US') });
+        }).then(() => {
+            if(!reqData) return;
+            const client = clientsDatabase.find(c => c.id === reqData.userId);
+            if(!client) { alert("خطأ: العميل غير موجود في قاعدة البيانات!"); return; }
+            const clientRef = db.ref('clients/' + client._key);
+            const userAccRef = db.ref('user_accounts/' + reqData.userKey);
+            return clientRef.once('value').then(snap => {
+                const data = snap.val();
+                const newDebt = (data.debt || 0) + reqData.amount;
+                const newOrders = (data.totalOrders || 0) + 1;
+                return clientRef.update({ debt: newDebt, totalOrders: newOrders }).then(() => {
+                    return userAccRef.once('value').then(uSnap => {
+                        const uData = uSnap.val() || {};
+                        return userAccRef.update({ debt: (uData.debt || 0) + reqData.amount });
+                    });
+                }).then(() => {
+                    const report = { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', requestKey: requestKey, appName: reqData.appName || '' };
+                    return db.ref('shipping_logs').push().set(report);
+                }).then(() => {
+                    sendToGoogleSheet("appendRow", { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', appName: reqData.appName || '' });
+                    notifyRequestApproved(reqData, currentLoggedStaff);
+                    alert('✅ تمت الموافقة على الطلب وتوثيق الحركة!');
+                    updateNotificationBadge();
+                });
+            });
+        }).catch(err => { console.error("Approve error:", err); alert("❌ خطأ: " + err.message); });
+    }
+
+    function rejectUserRequest(requestKey) {
+        if(!confirm("هل أنت متأكد من رفض هذا الطلب؟ سيتم إرجاع المبلغ للرصيد.")) return;
+        const reqRef = db.ref('user_requests/' + requestKey);
+        reqRef.once('value').then(snap => {
+            const reqData = snap.val();
+            if (reqData && reqData.userKey && reqData.amount) {
+                const userRef = db.ref('user_accounts/' + reqData.userKey);
+                return userRef.once('value').then(uSnap => {
+                    const uData = uSnap.val() || {};
+                    const newBalance = (uData.balance || 0) + reqData.amount;
+                    return userRef.update({ balance: newBalance });
+                });
+            }
+        }).then(() => {
+            return reqRef.update({ status: 'rejected', staff: currentLoggedStaff || 'system', processedTime: new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US') });
+        }).then(() => { 
+            showToast('❌ تم رفض الطلب وإرجاع المبلغ للرصيد'); 
+            updateNotificationBadge(); 
+        })
+        .catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
+    // ==================== USER PORTAL UI ====================
+    function updateUserPortalUI() {
+        if(!currentLoggedUser) return;
+        db.ref('user_accounts/' + currentLoggedUser._key).once('value').then(snap => {
+            const freshData = snap.val();
+            if (freshData) {
+                currentLoggedUser.balance = freshData.balance || 0;
+                currentLoggedUser.debt = freshData.debt || 0;
+            }
+            document.getElementById('userBadge').innerHTML = 'المستخدم: <strong>' + currentLoggedUser.name + '</strong> | ID: ' + currentLoggedUser.id;
+            document.getElementById('userBalanceValue').innerText = (currentLoggedUser.balance || 0).toFixed(2);
+            document.getElementById('userDebtValue').innerText = (currentLoggedUser.debt || 0).toFixed(2);
+            document.getElementById('userSelfIdDisplay').innerText = currentLoggedUser.id;
+            loadUserOrders();
+        });
+    }
+
+    function loadUserOrders() {
+        if(!currentLoggedUser) return;
+        const container = document.getElementById('userOrdersContainer');
+        Promise.all([
+            db.ref('user_requests').orderByChild('userKey').equalTo(currentLoggedUser._key).once('value'),
+            db.ref('shipping_logs').orderByChild('clientId').equalTo(currentLoggedUser.id).once('value')
+        ]).then(([requestsSnap, logsSnap]) => {
+            let allOrders = [];
+            requestsSnap.forEach(child => { let o = child.val(); o._key = child.key; o._type = 'request'; allOrders.push(o); });
+            logsSnap.forEach(child => { let o = child.val(); o._key = child.key; if (o.source === 'staff_manual' && !o.requestKey) { o._type = 'staff_shipment'; o.status = 'completed'; allOrders.push(o); } });
+            allOrders.sort((a, b) => { const dateA = parseLogDate(a.time) || new Date(0); const dateB = parseLogDate(b.time) || new Date(0); return dateB - dateA; });
+            if(allOrders.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>لا توجد طلبات حتى الآن</p></div>';
+                return;
+            }
+            let html = '<table class="user-orders-table">';
+            html += '<thead><tr><th>#</th><th>المبلغ</th><th>البرنامج</th><th>الوجهة</th><th>الحالة</th><th>الموظف</th><th>الوقت</th></tr></thead><tbody>';
+            allOrders.forEach((o, i) => {
+                let statusClass = 'status-pending', statusText = '⏳ قيد المعالجة';
+                if(o.status === 'completed') { statusClass = 'status-completed'; statusText = '✅ تم الشحن'; }
+                else if(o.status === 'rejected') { statusClass = 'status-rejected'; statusText = '❌ مرفوض'; }
+                const destText = o.destination === 'self' || o.destination === 'لنفسه' ? 'لنفسي' : 'للغير (' + (o.targetId || o.chargedId || '') + ')';
+                const staffName = o.staff || (o._type === 'staff_shipment' ? 'موظف' : '—');
+                const appName = o.appName || '—';
+                html += '<tr><td>' + (i + 1) + '</td><td style="color:var(--primary-color);font-weight:bold;">' + o.amount + ' $</td><td>' + appName + '</td><td>' + destText + '</td><td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td><td>' + staffName + '</td><td>' + o.time + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        });
+    }
+
+    function toggleUserDestField() {
+        const dest = document.querySelector('input[name="userChargeDest"]:checked').value;
+        document.getElementById('userOtherIdGroup').style.display = dest === 'other' ? 'block' : 'none';
+    }
+
+    function logoutUser() {
+        currentLoggedUser = null; selectedApp = null;
+        document.getElementById('userPortalPage').classList.remove('active');
+        document.getElementById('loginPage').classList.add('active');
+        document.getElementById('notifBell').style.display = 'none';
+    }
+
+    // ==================== ADMIN USER ACCOUNT ====================
+    function handleCreateUserAccount(event) {
+        event.preventDefault();
+        const name = document.getElementById('newUserAccName').value.trim();
+        const id = document.getElementById('newUserAccId').value.trim();
+        const password = document.getElementById('newUserAccPass').value.trim();
+        const clientExists = clientsDatabase.some(c => c.id === id);
+        if(!clientExists) { alert("⚠️ تنبيه: هذا الـ ID غير موجود في قاعدة العملاء. يجب إضافته أولاً كعميل."); return; }
+        const accExists = userAccounts.some(u => u.id === id);
+        if(accExists) { alert("❌ خطأ: حساب مستخدم بهذا الـ ID موجود بالفعل!"); return; }
+        const userPayload = { name: name, id: id, password: password, balance: 0, debt: 0, createdAt: new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US') };
+        db.ref('user_accounts').push().set(userPayload)
+        .then(() => { alert('✅ تم إنشاء حساب المستخدم بنجاح!\n\nالاسم: ' + name + '\nID: ' + id + '\nالباسورد: ' + password); document.getElementById('addUserAccountForm').reset(); })
+        .catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
+    function deleteUserAccount(key, name) {
+        if(confirm("هل أنت متأكد من حذف حساب المستخدم: " + name + "؟")) {
+            db.ref('user_accounts/' + key).remove();
+            alert("تم حذف الحساب!");
+        }
+    }
+
+    // ==================== LOGIN ====================
+    function handleLogin(event) {
+        event.preventDefault();
+        const user = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value.trim();
+        if(currentLoginType === 'staff') {
+            const match = staffAccounts.find(s => s.username === user && s.password === pass);
+            if (match) {
+                currentLoggedStaff = match.username;
+                document.getElementById('loginPage').classList.remove('active');
+                document.getElementById('dashboardPage').classList.add('active');
+                document.getElementById('staffBadge').innerHTML = 'الموظف المسؤول: <strong>' + currentLoggedStaff + '</strong>';
+                document.getElementById('notifBell').style.display = 'flex';
+                updateNotificationBadge();
+                loadClientsDropdown();
+            } else { alert("بيانات خاطئة!"); }
+        } else {
+            const match = userAccounts.find(u => u.name === user && u.password === pass);
+            if(match) {
+                currentLoggedUser = match;
+                document.getElementById('loginPage').classList.remove('active');
+                document.getElementById('userPortalPage').classList.add('active');
+                updateUserPortalUI();
+            } else { alert("بيانات خاطئة!"); }
+        }
+    }
+
+    function settleDebt(key, name) {
+        if(confirm("تصفير مديونية " + name + "؟")) {
+            db.ref('clients/' + key).update({debt: 0, totalOrders: 0});
+            const client = clientsDatabase.find(c => c._key === key);
+            if (client) {
+                const userAcc = userAccounts.find(u => u.id === client.id);
+                if (userAcc) { db.ref('user_accounts/' + userAcc._key).update({debt: 0}); }
+            }
+            alert("تم التصفير!");
+        }
+    }
+
+    function deleteClient(key, name) {
+        if(confirm("هل أنت متأكد من حذف العميل: " + name + " نهائياً؟")) { db.ref('clients/' + key).remove(); alert("تم حذف العميل!"); }
+    }
+
+    function searchByIdDirectly() {
+        const id = document.getElementById('idSearchInput').value.trim();
+        const typeSelected = document.querySelector('input[name="targetType"]:checked').value;
+        const found = clientsDatabase.find(c => c.id === id && c.type === typeSelected);
+        if (found) { document.getElementById('clientSelect').value = found.name; document.getElementById('clientStaticId').value = found.id; }
+    }
+
+    function filterAdminTable() {
+        let val = document.getElementById("adminSearchInput").value.toLowerCase();
+        let rows = document.querySelectorAll("#adminClientsTableBody tr");
+        rows.forEach(tr => { tr.style.display = tr.textContent.toLowerCase().includes(val) ? "" : "none"; });
+    }
+
+    function saveAdminSettings() {
+        const scriptUrl = document.getElementById('scriptUrlInput').value.trim();
+        const sheetUrl = document.getElementById('sheetUrlInput').value.trim();
+        db.ref('settings').set({ scriptUrl, sheetUrl }).then(() => alert("تم ربط الإكسل وتحديث المنظومة سحابياً!")).catch(() => alert("خطأ في الحفظ"));
+    }
+
+    function sendToGoogleSheet(actionType, payload) {
+        if(!globalScriptUrl) return;
+        const formData = new URLSearchParams();
+        formData.append("action", actionType);
+        formData.append("data", JSON.stringify(payload));
+        fetch(globalScriptUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData.toString() });
+    }
+
+    function notifyNewRequest(requestData) {
+        const appInfo = requestData.appName ? '🎮 *البرنامج:* ' + requestData.appName + '\n' : '';
+        const message = '🆕 *طلب شحن جديد!*\n\n👤 *العميل:* ' + requestData.userName + '\n🆔 *ID:* ' + requestData.userId + '\n' + appInfo + '💰 *المبلغ:* ' + requestData.amount + ' $\n🎯 *الوجهة:* ' + (requestData.destination === 'self' ? 'لنفسه' : 'للغير (' + requestData.targetId + ')') + '\n⏰ *الوقت:* ' + requestData.time + '\n\n🔔 يرجى مراجعة لوحة التحكم للموافقة على الطلب.';
+        sendTelegramToAllActiveBots(message);
+    }
+
+    function notifyRequestApproved(requestData, staffName) {
+        const appInfo = requestData.appName ? '🎮 *البرنامج:* ' + requestData.appName + '\n' : '';
+        const message = '✅ *تمت الموافقة على طلب شحن*\n\n👤 *العميل:* ' + requestData.userName + '\n' + appInfo + '💰 *المبلغ:* ' + requestData.amount + ' $\n👔 *تمت الموافقة بواسطة:* ' + staffName + '\n⏰ *الوقت:* ' + new Date().toLocaleString('ar-EG');
+        sendTelegramToAllActiveBots(message);
+    }
+
+    function openAdminPanel() {
+        if (prompt("الباسورد السري للمدير:") === "1987") {
+            document.querySelectorAll('.form-page').forEach(p => p.classList.remove('active'));
+            document.getElementById('adminPanelPage').classList.add('active');
+        } else { alert("مرفوض!"); }
+    }
+
+    function renderStaffTable() {
+        const tbody = document.getElementById('staffTableBody');
+        tbody.innerHTML = "";
+        staffAccounts.forEach((st) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td><strong>' + st.username + '</strong></td><td>' + st.password + '</td>' +
+            '<td><button class="btn-danger" onclick="deleteStaff(&quot;' + st.username + '&quot;)">حذف</button></td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function handleCreateStaff(event) {
+        event.preventDefault();
+        const username = document.getElementById('newStaffUser').value.trim();
+        const password = document.getElementById('newStaffPass').value.trim();
+        db.ref('staff/' + username).set({ username, password });
+        document.getElementById('addStaffForm').reset();
+    }
+
+    function deleteStaff(username) {
+        if(confirm("حذف الموظف؟")) db.ref('staff/' + username).remove();
+    }
+
+    function loadClientsDropdown() {
+        const typeSelected = document.querySelector('input[name="targetType"]:checked').value;
+        const dropdown = document.getElementById('clientSelect');
+        dropdown.innerHTML = '<option value="">-- اختر الاسم --</option>';
+        clientsDatabase.filter(c => c.type === typeSelected).forEach(c => {
+            const opt = document.createElement('option'); opt.value = c.name; opt.innerText = c.name; dropdown.appendChild(opt);
+        });
+        document.getElementById('clientStaticId').value = "";
+    }
+
+    function handleClientSelectChange() {
+        const selectedName = document.getElementById('clientSelect').value;
+        const typeSelected = document.querySelector('input[name="targetType"]:checked').value;
+        const found = clientsDatabase.find(c => c.name === selectedName && c.type === typeSelected);
+        document.getElementById('clientStaticId').value = found ? found.id : "";
+    }
+
+    function lookupDebtById() {
+        const searchId = document.getElementById('searchIdInput').value.trim();
+        const fromDateVal = document.getElementById('searchFromDate').value;
+        const toDateVal = document.getElementById('searchToDate').value;
+        const resultBox = document.getElementById('searchResult');
+        if(!searchId) { resultBox.style.display = 'none'; return; }
+        const found = clientsDatabase.find(c => c.id === searchId);
+        resultBox.style.display = 'block';
+        if(!found) { resultBox.innerHTML = '❌ الـ ID غير مسجل!'; return; }
+        const fromDate = fromDateVal ? new Date(fromDateVal + 'T00:00:00') : null;
+        const toDate = toDateVal ? new Date(toDateVal + 'T23:59:59') : null;
+        const hasDateFilter = fromDateVal || toDateVal;
+        db.ref('shipping_logs').once('value').then(snapshot => {
+            let logs = [], childSnapshots = [];
+            snapshot.forEach(child => { let log = child.val(); log._key = child.key; logs.push(log); childSnapshots.push({key: child.key, val: child.val()}); });
+            let clientLogs = logs.filter(l => l.clientId === searchId);
+            let filteredLogs = clientLogs;
+            if (hasDateFilter) {
+                filteredLogs = clientLogs.filter(l => {
+                    const logDate = parseLogDate(l.time);
+                    if (!logDate) return false;
+                    const logDateOnly = new Date(logDate.getFullYear(), logDate.getMonth(), logDate.getDate());
+                    const fromDateOnly = fromDate ? new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate()) : null;
+                    const toDateOnly = toDate ? new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate()) : null;
+                    let match = true;
+                    if (fromDateOnly && logDateOnly < fromDateOnly) match = false;
+                    if (toDateOnly && logDateOnly > toDateOnly) match = false;
+                    return match;
+                });
+            }
+            let filteredDebt = 0;
+            if (hasDateFilter) filteredDebt = filteredLogs.reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0);
+            else filteredDebt = found.debt || 0;
+            let html = '';
+            html += '<h4>📌 بيانات العميل: ' + found.name + '</h4>';
+            html += '<div class="summary-row"><strong>الـ ID:</strong><span>' + found.id + '</span></div>';
+            html += '<div class="summary-row"><strong>الفئة:</strong><span>' + found.type + '</span></div>';
+            if (hasDateFilter) {
+                html += '<div class="summary-row"><strong>📅 الفترة:</strong><span>' + (fromDateVal || 'البداية') + ' &rarr; ' + (toDateVal || 'النهاية') + '</span></div>';
+                html += '<div class="summary-row"><strong>💰 المديونية في الفترة:</strong><span>' + filteredDebt.toFixed(2) + ' $</span></div>';
+                html += '<div class="summary-row"><strong>📊 عدد الشحنات في الفترة:</strong><span>' + filteredLogs.length + '</span></div>';
+                html += '<div class="summary-row"><strong>💰 المديونية الكلية:</strong><span style="color:#b3b3b3;">' + (found.debt || 0) + ' $</span></div>';
+            } else {
+                html += '<div class="summary-row"><strong>💰 المديونية الكلية:</strong><span>' + (found.debt || 0) + ' $</span></div>';
+                html += '<div class="summary-row"><strong>📊 إجمالي الشحنات:</strong><span>' + (found.totalOrders || 0) + '</span></div>';
+            }
+            if (filteredLogs.length > 0) {
+                html += '<h4 style="margin-top:15px;">📝 تفاصيل الشحنات:</h4>';
+                html += '<div style="max-height:250px; overflow-y:auto;">';
+                html += '<table class="log-table" id="logsTable">';
+                html += '<thead><tr><th>#</th><th>التاريخ</th><th>المبلغ</th><th>الوجهة</th><th>الموظف</th><th>إجراء</th></tr></thead>';
+                html += '<tbody>';
+                filteredLogs.forEach((log, index) => {
+                    const logKey = childSnapshots[index] ? childSnapshots[index].key : '';
+                    const amount = parseFloat(log.amount) || 0;
+                    html += '<tr><td>' + (index + 1) + '</td><td>' + log.time + '</td><td style="color:var(--primary-color); font-weight:bold;">' + log.amount + ' $</td><td>' + (log.destination === 'لنفسه' ? 'لنفسه' : (log.chargedId || 'للغير')) + '</td><td>' + log.staff + '</td><td>';
+                    if (logKey) html += '<button class="delete-log-btn" onclick="openDeleteConfirm(\'' + logKey + '\',' + amount + ',\'' + searchId + '\')" title="حذف الشحنة">🗑️ حذف</button>';
+                    html += '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            } else if (hasDateFilter) html += '<div class="no-logs">لا توجد شحنات في الفترة المحددة</div>';
+            if (hasDateFilter) {
+                html += '<div class="download-section">';
+                html += '<button class="download-btn" onclick="downloadPeriodReport(\'' + found.name + '\',\'' + found.id + '\',\'' + (fromDateVal || '') + '\',\'' + (toDateVal || '') + '\',' + filteredDebt.toFixed(2) + ',' + filteredLogs.length + ')">';
+                html += '📥 تحميل تقرير الفترة (PDF)'; html += '</button></div>';
+            }
+            resultBox.innerHTML = html;
+        });
+    }
+
+    function parseLogDate(dateStr) {
+        if (!dateStr) return null;
+        try {
+            let d = new Date(dateStr);
+            if (!isNaN(d.getTime())) return d;
+            const parts = dateStr.split(',');
+            if (parts.length >= 2) {
+                const datePart = parts[0].trim();
+                const timePart = parts[1].trim();
+                const dateSegments = datePart.split('/');
+                if (dateSegments.length === 3) {
+                    const month = parseInt(dateSegments[0].trim()) - 1;
+                    const day = parseInt(dateSegments[1].trim());
+                    const year = parseInt(dateSegments[2].trim());
+                    let hours = 0, minutes = 0, seconds = 0;
+                    const timeMatch = timePart.match(/(\d{1,2}):(\d{1,2}):(\d{1,2})\s*(AM|PM)/i);
+                    if (timeMatch) {
+                        hours = parseInt(timeMatch[1]);
+                        minutes = parseInt(timeMatch[2]);
+                        seconds = parseInt(timeMatch[3]);
+                        const ampm = timeMatch[4].toUpperCase();
+                        if (ampm === 'PM' && hours !== 12) hours += 12;
+                        if (ampm === 'AM' && hours === 12) hours = 0;
+                    }
+                    const result = new Date(year, month, day, hours, minutes, seconds);
+                    if (!isNaN(result.getTime())) return result;
+                }
+            }
+            return null;
+        } catch (e) { return null; }
+    }
+    function downloadPeriodReport(clientName, clientId, fromDate, toDate, totalDebt, totalCount) {
+        let reportHtml = '<div id="pdf-report" style="width:210mm;padding:15mm;background:#ffffff;direction:rtl;font-family:Arial,sans-serif;color:#000;box-sizing:border-box;">';
+        reportHtml += '<div style="text-align:center;margin-bottom:15px;">';
+        reportHtml += '<h2 style="color:#cc0000;margin:0;font-size:22px;">Ali Recharge Agency</h2>';
+        reportHtml += '<h3 style="color:#333;margin:5px 0;font-size:16px;">تقرير المديونية</h3>';
+        reportHtml += '<hr style="border:1px solid #cc0000;margin:10px 0;">'; reportHtml += '</div>';
+        reportHtml += '<table style="width:100%;border-collapse:collapse;margin-bottom:15px;font-size:12px;color:#000;">';
+        reportHtml += '<tr><td style="padding:6px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;width:30%;">اسم العميل</td><td style="padding:6px;border:1px solid #ddd;">' + clientName + '</td></tr>';
+        reportHtml += '<tr><td style="padding:6px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;">ID العميل</td><td style="padding:6px;border:1px solid #ddd;">' + clientId + '</td></tr>';
+        reportHtml += '<tr><td style="padding:6px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;">الفترة من</td><td style="padding:6px;border:1px solid #ddd;">' + (fromDate || 'البداية') + '</td></tr>';
+        reportHtml += '<tr><td style="padding:6px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;">الفترة إلى</td><td style="padding:6px;border:1px solid #ddd;">' + (toDate || 'النهاية') + '</td></tr>';
+        reportHtml += '<tr><td style="padding:6px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;">إجمالي المديونية</td><td style="padding:6px;border:1px solid #ddd;color:#cc0000;font-weight:bold;">' + totalDebt + ' $</td></tr>';
+        reportHtml += '<tr><td style="padding:6px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;">عدد الشحنات</td><td style="padding:6px;border:1px solid #ddd;">' + totalCount + '</td></tr>';
+        reportHtml += '<tr><td style="padding:6px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;">تاريخ التقرير</td><td style="padding:6px;border:1px solid #ddd;">' + new Date().toLocaleDateString('en-US') + '</td></tr>';
+        reportHtml += '</table>';
+        reportHtml += '<h4 style="color:#333;margin:15px 0 10px;font-size:14px;">تفاصيل الشحنات</h4>';
+        reportHtml += '<table style="width:100%;border-collapse:collapse;font-size:11px;color:#000;">';
+        reportHtml += '<thead><tr style="background:#cc0000;color:#fff;">';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">#</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">التاريخ</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">المبلغ</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الوجهة</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الموظف</th>';
+        reportHtml += '</tr></thead><tbody>';
+        const table = document.getElementById('logsTable');
+        if (table) {
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach((row, i) => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 5) {
+                    const bg = i % 2 === 0 ? '#ffffff' : '#f9f9f9';
+                    reportHtml += '<tr style="background:' + bg + ';">';
+                    reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[0].innerText + '</td>';
+                    reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[1].innerText + '</td>';
+                    reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;color:#cc0000;">' + cells[2].innerText + '</td>';
+                    reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[3].innerText + '</td>';
+                    reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + cells[4].innerText + '</td>';
+                    reportHtml += '</tr>';
+                }
+            });
+        }
+        reportHtml += '</tbody></table></div>';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = reportHtml;
+        tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0';
+        document.body.appendChild(tempDiv);
+        const element = tempDiv.querySelector('#pdf-report');
+        html2canvas(element, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false }).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 210, pageHeight = 297;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight, position = 0;
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight; }
+            pdf.save('تقرير_المديونية_' + clientName + '_' + (fromDate || 'all') + '_to_' + (toDate || 'all') + '.pdf');
+            document.body.removeChild(tempDiv);
+        }).catch(err => { console.error('PDF Error:', err); document.body.removeChild(tempDiv); });
+    }
+
+    function downloadAllDebts() {
+        let totalAllDebts = 0, totalAllOrders = 0;
+        let reportHtml = '<div id="pdf-report" style="width:210mm;padding:15mm;background:#ffffff;direction:rtl;font-family:Arial,sans-serif;color:#000;box-sizing:border-box;">';
+        reportHtml += '<div style="text-align:center;margin-bottom:15px;">';
+        reportHtml += '<h2 style="color:#cc0000;margin:0;font-size:22px;">Ali Recharge Agency</h2>';
+        reportHtml += '<h3 style="color:#333;margin:5px 0;font-size:16px;">تقرير جميع المديونيات</h3>';
+        reportHtml += '<p style="color:#666;font-size:12px;margin:5px 0;">تاريخ التقرير: ' + new Date().toLocaleDateString('en-US') + ' | عدد العملاء: ' + clientsDatabase.length + '</p>';
+        reportHtml += '<hr style="border:1px solid #cc0000;margin:10px 0;">'; reportHtml += '</div>';
+        reportHtml += '<table style="width:100%;border-collapse:collapse;font-size:11px;color:#000;">';
+        reportHtml += '<thead><tr style="background:#cc0000;color:#fff;">';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الاسم</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">ID</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الفئة</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">المديونية</th>';
+        reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">عدد الشحنات</th>';
+        reportHtml += '</tr></thead><tbody>';
+        clientsDatabase.forEach((c, i) => {
+            const debt = c.debt || 0, orders = c.totalOrders || 0;
+            totalAllDebts += debt; totalAllOrders += orders;
+            const bg = i % 2 === 0 ? '#ffffff' : '#f9f9f9';
+            reportHtml += '<tr style="background:' + bg + ';">';
+            reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + c.name + '</td>';
+            reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + c.id + '</td>';
+            reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + c.type + '</td>';
+            reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;color:#cc0000;font-weight:bold;">' + debt + ' $</td>';
+            reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + orders + '</td>';
+            reportHtml += '</tr>';
+        });
+        reportHtml += '</tbody></table>';
+        reportHtml += '<div style="margin-top:20px;padding:12px;background:#cc0000;color:#fff;text-align:center;font-weight:bold;font-size:14px;border-radius:4px;">';
+        reportHtml += 'الإجمالي الكلي: ' + totalAllDebts + ' $ &nbsp;&nbsp;|&nbsp;&nbsp; إجمالي الشحنات: ' + totalAllOrders;
+        reportHtml += '</div></div>';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = reportHtml;
+        tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0';
+        document.body.appendChild(tempDiv);
+        const element = tempDiv.querySelector('#pdf-report');
+        html2canvas(element, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false }).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 210, pageHeight = 297;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight, position = 0;
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight; }
+            pdf.save('تقرير_جميع_المديونيات_' + new Date().toLocaleDateString('en-US').replace(/\//g, '-') + '.pdf');
+            document.body.removeChild(tempDiv);
+        }).catch(err => { console.error('PDF Error:', err); document.body.removeChild(tempDiv); });
+    }
+
+    function showAddClientModal(type) {
+        currentAddingType = type;
+        document.getElementById('addClientTitle').innerText = 'إضافة [' + type + '] جديد للمنظومة';
+        document.getElementById('dashboardPage').classList.remove('active');
+        document.getElementById('addClientPage').classList.add('active');
+    }
+
+    function backToDashboard() {
+        document.getElementById('addClientPage').classList.remove('active');
+        document.getElementById('dashboardPage').classList.add('active');
+    }
+
+    function handleSaveClient(event) {
+        event.preventDefault();
+        const name = document.getElementById('newClientName').value.trim();
+        const id = document.getElementById('newClientId').value.trim();
+        const isExists = clientsDatabase.some(c => c.id === id);
+        if (isExists) { alert("خطأ: هذا الـ ID مسجل بالفعل في المنظومة، لا يمكن تكرار نفس الـ ID!"); return; }
+        const clientPayload = { type: currentAddingType, name: name, id: id, debt: 0, totalOrders: 0 };
+        db.ref('clients/' + id).set(clientPayload);
+        sendToGoogleSheet("createTab", clientPayload);
+        alert('تم الحفظ وإصدار أمر إنشاء ورقة عمل بالإكسل باسم: ' + name);
+        document.getElementById('addClientForm').reset();
+        backToDashboard();
+    }
+
+    function handleShippingSubmit(event) {
+        event.preventDefault();
+        const clientName = document.getElementById('clientSelect').value;
+        const staticId = document.getElementById('clientStaticId').value;
+        const chargeDestination = document.querySelector('input[name="chargeDestination"]:checked').value;
+        const amount = parseFloat(document.getElementById('chargeAmount').value);
+        let finalChargedId = staticId;
+        if (chargeDestination === 'other') finalChargedId = document.getElementById('otherTargetId').value.trim();
+        const now = new Date();
+        const formattedTime = now.toLocaleDateString('en-US') + ', ' + now.toLocaleTimeString('en-US');
+        const clientRef = db.ref('clients/' + staticId);
+        clientRef.once('value').then((snapshot) => {
+            const data = snapshot.val();
+            const newDebt = (data.debt || 0) + amount;
+            const newOrders = (data.totalOrders || 0) + 1;
+            return clientRef.update({ debt: newDebt, totalOrders: newOrders });
+        }).then(() => {
+            const report = { staff: currentLoggedStaff, clientName: clientName, clientId: staticId, destination: chargeDestination === 'self' ? 'لنفسه' : 'للغير', chargedId: finalChargedId, amount: amount, time: formattedTime, source: 'staff_manual' };
+            return db.ref('shipping_logs').push().set(report);
+        }).then(() => {
+            const userAcc = userAccounts.find(u => u.id === staticId);
+            if (userAcc) {
+                const userAccRef = db.ref('user_accounts/' + userAcc._key);
+                return userAccRef.once('value').then(uSnap => {
+                    const uData = uSnap.val() || {};
+                    return userAccRef.update({ debt: (uData.debt || 0) + amount });
+                });
+            }
+        }).then(() => {
+            sendToGoogleSheet("appendRow", { staff: currentLoggedStaff, clientName: clientName, clientId: staticId, destination: chargeDestination === 'self' ? 'لنفسه' : 'للغير', chargedId: finalChargedId, amount: amount, time: formattedTime });
+            const msg = '✅ *شحن جديد*\n\n👤 *العميل:* ' + clientName + '\n🆔 *ID:* ' + staticId + '\n💰 *المبلغ:* ' + amount + ' $\n🎯 *الوجهة:* ' + (chargeDestination === 'self' ? 'لنفسه' : 'للغير') + '\n👔 *الموظف:* ' + currentLoggedStaff + '\n⏰ ' + formattedTime;
+            sendTelegramToAllActiveBots(msg);
+            alert('تم الشحن وتوثيق الحركة في ملف إكسل العميل المخصص!');
+            document.getElementById('chargeAmount').value = "";
+        }).catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
+    function toggleDestField() {
+        const dest = document.querySelector('input[name="chargeDestination"]:checked').value;
+        document.getElementById('otherIdGroup').style.display = dest === 'other' ? 'block' : 'none';
+    }
+
+    function backToLoginOrDash() {
+        document.getElementById('adminPanelPage').classList.remove('active');
+        if(currentLoggedStaff) document.getElementById('dashboardPage').classList.add('active');
+        else if(currentLoggedUser) document.getElementById('userPortalPage').classList.add('active');
+        else document.getElementById('loginPage').classList.add('active');
+    }
+
+    function logoutStaff() {
+        currentLoggedStaff = null;
+        document.getElementById('dashboardPage').classList.remove('active');
+        document.getElementById('loginPage').classList.add('active');
+        document.getElementById('notifBell').style.display = 'none';
+        document.getElementById('notificationsPanel').classList.remove('active');
+    }
+
+    // ======= Delete Shipment =======
+    let pendingDeleteLogKey = null, pendingDeleteLogAmount = 0, pendingDeleteLogClientId = null;
+
+    function openDeleteConfirm(logKey, amount, clientId) {
+        pendingDeleteLogKey = logKey;
+        pendingDeleteLogAmount = parseFloat(amount);
+        pendingDeleteLogClientId = clientId;
+        const overlay = document.getElementById('deleteConfirmOverlay');
+        const text = document.getElementById('deleteConfirmText');
+        text.innerHTML = 'هل أنت متأكد من حذف هذه الشحنة؟<br><br>' +
+            '<strong style="color:#ff4444;">المبلغ:</strong> ' + amount + ' $<br>' +
+            '<strong style="color:#ff4444;">العميل ID:</strong> ' + clientId + '<br><br>' +
+            'سيتم:<br>• خصم المبلغ من المديونية<br>• إنقاص عدد الشحنات بـ 1<br>• حذف السجل نهائياً';
+        overlay.style.display = 'flex';
+    }
+
+    function cancelDelete() {
+        pendingDeleteLogKey = null; pendingDeleteLogAmount = 0; pendingDeleteLogClientId = null;
+        document.getElementById('deleteConfirmOverlay').style.display = 'none';
+    }
+
+    function confirmDelete() {
+        if (!pendingDeleteLogKey || !pendingDeleteLogClientId) { cancelDelete(); return; }
+        const logRef = db.ref('shipping_logs/' + pendingDeleteLogKey);
+        const clientRef = db.ref('clients/' + pendingDeleteLogClientId);
+        logRef.once('value').then((logSnapshot) => {
+            const logData = logSnapshot.val();
+            return clientRef.once('value').then((snapshot) => {
+                const clientData = snapshot.val();
+                if (!clientData) { alert("خطأ: العميل غير موجود!"); cancelDelete(); return; }
+                const currentDebt = parseFloat(clientData.debt) || 0;
+                const currentOrders = parseInt(clientData.totalOrders) || 0;
+                const newDebt = Math.max(0, currentDebt - pendingDeleteLogAmount);
+                const newOrders = Math.max(0, currentOrders - 1);
+                return clientRef.update({ debt: newDebt, totalOrders: newOrders });
+            }).then(() => {
+                const userAcc = userAccounts.find(u => u.id === pendingDeleteLogClientId);
+                if (userAcc) {
+                    const userAccRef = db.ref('user_accounts/' + userAcc._key);
+                    return userAccRef.once('value').then(uSnap => {
+                        const uData = uSnap.val() || {};
+                        const currentUserDebt = parseFloat(uData.debt) || 0;
+                        const newUserDebt = Math.max(0, currentUserDebt - pendingDeleteLogAmount);
+                        return userAccRef.update({ debt: newUserDebt });
+                    });
+                }
+            }).then(() => {
+                if (logData && logData.requestKey) {
+                    return db.ref('user_requests/' + logData.requestKey).remove();
+                }
+            }).then(() => {
+                return logRef.remove();
+            }).then(() => {
+                alert('✅ تم حذف الشحنة بنجاح!\n\n• خصم ' + pendingDeleteLogAmount + '$ من المديونية\n• عدد الشحنات: -1\n• تم الحذف من جميع الجداول');
+                cancelDelete(); lookupDebtById();
+            });
+        }).catch((error) => { console.error("Delete error:", error); alert("❌ حدث خطأ أثناء الحذف: " + error.message); cancelDelete(); });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const overlay = document.getElementById('deleteConfirmOverlay');
+        if (overlay) overlay.addEventListener('click', function(e) { if (e.target === this) cancelDelete(); });
+        const balanceOverlay = document.getElementById('balanceModalOverlay');
+        if (balanceOverlay) balanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeBalanceModal(); });
+    });
+</script>
+</body>
+</html>
