@@ -457,10 +457,7 @@
     <div class="txn-modal-box">
         <h3>📋 سجل معاملات الرصيد - الموظف</h3>
         <div class="txn-header-info" id="staffTxnHeader"></div>
-        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 12px;">
-            <button class="txn-download-btn" onclick="downloadStaffTxnPDF()">📥 تحميل الفاتورة (PDF)</button>
-            <button class="btn-danger" style="padding: 8px 14px; font-size: 12px; border-radius: 8px; width: auto;" onclick="resetStaffTransactions()">🗑️ تصفير السجل</button>
-        </div>
+        <button class="txn-download-btn" onclick="downloadStaffTxnPDF()">📥 تحميل الفاتورة (PDF)</button>
         <div id="staffTxnList"></div>
         <button class="btn-secondary txn-close-btn" onclick="closeStaffTxnModal()">إغلاق</button>
     </div>
@@ -471,10 +468,7 @@
     <div class="txn-modal-box">
         <h3>📋 سجل معاملات الرصيد - المستخدم</h3>
         <div class="txn-header-info" id="userTxnHeader"></div>
-        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 12px;">
-            <button class="txn-download-btn" onclick="downloadUserTxnPDF()">📥 تحميل الفاتورة (PDF)</button>
-            <button class="btn-danger" style="padding: 8px 14px; font-size: 12px; border-radius: 8px; width: auto;" onclick="resetUserTransactions()">🗑️ تصفير السجل</button>
-        </div>
+        <button class="txn-download-btn" onclick="downloadUserTxnPDF()">📥 تحميل الفاتورة (PDF)</button>
         <div id="userTxnList"></div>
         <button class="btn-secondary txn-close-btn" onclick="closeUserTxnModal()">إغلاق</button>
     </div>
@@ -1223,24 +1217,6 @@
         document.getElementById('userTxnModalOverlay').style.display = 'none';
     }
 
-    function resetUserBalance(userKey, userName) {
-        if(!confirm("⚠️ هل أنت متأكد من تصفير رصيد المستخدم: " + userName + "؟\n\nسيتم تصفير الرصيد إلى 0.00 $")) return;
-        const userRef = db.ref('user_accounts/' + userKey);
-        userRef.once('value').then(snap => {
-            const data = snap.val() || {};
-            const oldBalance = data.balance || 0;
-            if (oldBalance === 0) { showToast('ℹ️ الرصيد بالفعل صفر!'); return; }
-            const code = generateTxnCode();
-            const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
-            const txn = { type: 'deduct', amount: oldBalance, code: code, date: now, description: 'تصفير رصيد المستخدم (من ' + oldBalance.toFixed(2) + ' إلى 0.00)', balanceAfter: 0, admin: currentLoggedStaff || 'system' };
-            return db.ref('user_transactions/' + userKey).push().set(txn).then(() => {
-                return userRef.update({ balance: 0 });
-            });
-        }).then(() => {
-            showToast('✅ تم تصفير رصيد المستخدم!');
-        }).catch(err => { alert('❌ خطأ: ' + err.message); });
-    }
-
     function downloadUserTxnPDF() {
         const headerText = document.getElementById('userTxnHeader').innerText;
         const table = document.querySelector('#userTxnList table');
@@ -1327,24 +1303,6 @@
         document.getElementById('staffTxnModalOverlay').style.display = 'none';
     }
 
-    function resetStaffTransactions() {
-        if(!confirm("⚠️ هل أنت متأكد من تصفير جميع سجلات معاملات الرصيد المشترك؟\n\nسيتم حذف جميع السجلات نهائياً!")) return;
-        db.ref('staff_transactions').remove().then(() => {
-            showToast('✅ تم تصفير سجل معاملات الرصيد المشترك!');
-            closeStaffTxnModal();
-            loadStaffUsageReport();
-        }).catch(err => { alert('❌ خطأ: ' + err.message); });
-    }
-
-    function resetUserTransactions() {
-        if(!currentLoggedUser) return;
-        if(!confirm("⚠️ هل أنت متأكد من تصفير جميع سجلات معاملات رصيد المستخدم؟\n\nسيتم حذف جميع السجلات نهائياً!")) return;
-        db.ref('user_transactions/' + currentLoggedUser._key).remove().then(() => {
-            showToast('✅ تم تصفير سجل معاملات المستخدم!');
-            closeUserTxnModal();
-        }).catch(err => { alert('❌ خطأ: ' + err.message); });
-    }
-
     function downloadStaffTxnPDF() {
         const headerText = document.getElementById('staffTxnHeader').innerText;
         const table = document.querySelector('#staffTxnList table');
@@ -1427,8 +1385,7 @@
         const submitBtn = document.getElementById('submitRequestBtn');
         if (amount > 0 && amount > balance) {
             if (warningDiv) warningDiv.classList.add('active');
-            // Don't disable button - allow submission as debt
-            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; }
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
         } else {
             if (warningDiv) warningDiv.classList.remove('active');
             if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; }
@@ -1558,7 +1515,7 @@
         snapshot.forEach(child => {
             let ua = child.val(); ua._key = child.key; userAccounts.push(ua);
             if(tbody) tbody.innerHTML += '<tr><td>' + ua.name + '</td><td>' + ua.id + '</td><td>' + ua.password + '</td><td style="color:var(--success-color);font-weight:700;">' + (ua.balance || 0) + '$</td><td>' + (ua.debt || 0) + '$</td>' +
-            '<td><button class="btn-gold" style="padding:5px;font-size:11px;margin:2px;" onclick="openBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">💰 إضافة</button>' + '<button class="btn-blue" style="padding:5px;font-size:11px;margin:2px;" onclick="openEditBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">✏️ تعديل</button>' + '<button class="btn-warning" style="padding:5px;font-size:11px;margin:2px;" onclick="openUserTxnModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">📋 سجل</button>' + '<button class="btn-secondary" style="padding:5px;font-size:11px;margin:2px;" onclick="resetUserBalance(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">🔄 تصفير</button>' +
+            '<td><button class="btn-gold" style="padding:5px;font-size:11px;margin:2px;" onclick="openBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">💰 إضافة</button>' + '<button class="btn-blue" style="padding:5px;font-size:11px;margin:2px;" onclick="openEditBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">✏️ تعديل</button>' + '<button class="btn-warning" style="padding:5px;font-size:11px;margin:2px;" onclick="openUserTxnModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">📋 سجل</button>' +
             '<button class="btn-danger" style="padding:5px;font-size:11px;margin:2px;" onclick="deleteUserAccount(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">🗑️ حذف</button></td></tr>';
         });
         if(currentLoggedUser) {
@@ -1659,6 +1616,7 @@
         const chargeDest = document.querySelector('input[name="userChargeDest"]:checked').value;
         const amount = parseFloat(document.getElementById('userChargeAmount').value);
         const currentBalance = currentLoggedUser.balance || 0;
+        if (amount > currentBalance) { alert("❌ الرصيد غير كافٍ! الرصيد المتاح: " + currentBalance.toFixed(2) + " $"); return; }
         let targetId = currentLoggedUser.id;
         if(chargeDest === 'other') {
             targetId = document.getElementById('userOtherTargetId').value.trim();
@@ -1672,44 +1630,25 @@
             appKey: selectedApp._key, appName: selectedApp.name,
             time: formattedTime, status: 'pending', staff: '' 
         };
-
-        // Check if user has sufficient balance
-        if (amount <= currentBalance) {
-            // User has balance - deduct from balance
-            const userRef = db.ref('user_accounts/' + currentLoggedUser._key);
-            const newBalance = currentBalance - amount;
-            userRef.update({ balance: newBalance }).then(() => {
-                return db.ref('user_requests').push().set(requestData);
-            }).then(() => {
-                showToast('✅ تم إرسال طلب الشحن بنجاح!\nالرصيد المتبقي: ' + newBalance.toFixed(2) + ' $');
-                resetUserRequestForm();
-                loadUserOrders();
-                notifyNewRequest(requestData);
-            }).catch(err => { alert('❌ خطأ في الإرسال: ' + err.message); });
-        } else {
-            // User has no balance - create as debt request
-            if (!confirm('⚠️ الرصيد غير كافٍ! (الرصيد: ' + currentBalance.toFixed(2) + ' $ / المطلوب: ' + amount.toFixed(2) + ' $)\n\nسيتم إنشاء الطلب كمديونية. هل تريد المتابعة؟')) return;
-
-            db.ref('user_requests').push().set(requestData).then(() => {
-                showToast('✅ تم إرسال طلب الشحن كمديونية!');
-                resetUserRequestForm();
-                loadUserOrders();
-                notifyNewRequest(requestData);
-            }).catch(err => { alert('❌ خطأ في الإرسال: ' + err.message); });
-        }
-    }
-
-    function resetUserRequestForm() {
-        document.getElementById('userRequestForm').reset();
-        toggleUserDestField();
-        selectedApp = null;
-        renderAppsGrid();
-        const infoDiv = document.getElementById('selectedAppInfo');
-        if (infoDiv) infoDiv.classList.remove('active');
-        const warningDiv = document.getElementById('insufficientBalance');
-        if (warningDiv) warningDiv.classList.remove('active');
-        const submitBtn = document.getElementById('submitRequestBtn');
-        if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; }
+        const userRef = db.ref('user_accounts/' + currentLoggedUser._key);
+        const newBalance = currentBalance - amount;
+        userRef.update({ balance: newBalance }).then(() => {
+            return db.ref('user_requests').push().set(requestData);
+        }).then(() => {
+            showToast('✅ تم إرسال طلب الشحن بنجاح!\nالرصيد المتبقي: ' + newBalance.toFixed(2) + ' $');
+            document.getElementById('userRequestForm').reset();
+            toggleUserDestField();
+            selectedApp = null;
+            renderAppsGrid();
+            const infoDiv = document.getElementById('selectedAppInfo');
+            if (infoDiv) infoDiv.classList.remove('active');
+            const warningDiv = document.getElementById('insufficientBalance');
+            if (warningDiv) warningDiv.classList.remove('active');
+            const submitBtn = document.getElementById('submitRequestBtn');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; }
+            loadUserOrders();
+            notifyNewRequest(requestData);
+        }).catch(err => { alert('❌ خطأ في الإرسال: ' + err.message); });
     }
 
     function approveUserRequest(requestKey) {
@@ -1722,54 +1661,27 @@
             return reqRef.update({ status: 'completed', staff: currentLoggedStaff, processedTime: new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US') });
         }).then(() => {
             if(!reqData) return;
-
-            // Deduct from shared staff balance
-            const deductPromise = new Promise((resolve, reject) => {
-                if (sharedStaffBalance < reqData.amount) {
-                    alert('❌ الرصيد المشترك غير كافٍ! الرصيد المتاح: ' + sharedStaffBalance.toFixed(2) + ' $');
-                    reject(new Error('Insufficient shared balance'));
-                    return;
-                }
-                const newBalance = Math.max(0, sharedStaffBalance - reqData.amount);
-                const code = generateTxnCode();
-                const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
-                const txn = { type: 'deduct', amount: reqData.amount, code: code, date: now, description: 'خصم مقابل شحنة عميل (طلب بوابة) | العميل: ' + reqData.userName + ' (ID: ' + reqData.userId + ')', balanceAfter: newBalance, staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId };
-                db.ref('staff_transactions').push().set(txn).then(() => {
-                    return db.ref('shared_staff_balance').set(newBalance);
-                }).then(() => {
-                    sharedStaffBalance = newBalance;
-                    updateStaffBalanceUI();
-                    resolve();
-                }).catch(err => reject(err));
-            });
-
-            return deductPromise.then(() => {
-                const client = clientsDatabase.find(c => c.id === reqData.userId);
-                if(!client) { alert("خطأ: العميل غير موجود في قاعدة البيانات!"); return; }
-                const clientRef = db.ref('clients/' + client._key);
-                const userAccRef = db.ref('user_accounts/' + reqData.userKey);
-                return clientRef.once('value').then(snap => {
-                    const data = snap.val();
-                    const newDebt = (data.debt || 0) + reqData.amount;
-                    const newOrders = (data.totalOrders || 0) + 1;
-                    return clientRef.update({ debt: newDebt, totalOrders: newOrders }).then(() => {
-                        return userAccRef.once('value').then(uSnap => {
-                            const uData = uSnap.val() || {};
-                            // If user didn't pay from balance, add to user debt
-                            if (!reqData.paidFromBalance) {
-                                return userAccRef.update({ debt: (uData.debt || 0) + reqData.amount });
-                            }
-                            return Promise.resolve();
-                        });
-                    }).then(() => {
-                        const report = { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', requestKey: requestKey, appName: reqData.appName || '', paidFromBalance: reqData.paidFromBalance || false };
-                        return db.ref('shipping_logs').push().set(report);
-                    }).then(() => {
-                        sendToGoogleSheet("appendRow", { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', appName: reqData.appName || '' });
-                        notifyRequestApproved(reqData, currentLoggedStaff);
-                        alert('✅ تمت الموافقة على الطلب وتوثيق الحركة!');
-                        updateNotificationBadge();
+            const client = clientsDatabase.find(c => c.id === reqData.userId);
+            if(!client) { alert("خطأ: العميل غير موجود في قاعدة البيانات!"); return; }
+            const clientRef = db.ref('clients/' + client._key);
+            const userAccRef = db.ref('user_accounts/' + reqData.userKey);
+            return clientRef.once('value').then(snap => {
+                const data = snap.val();
+                const newDebt = (data.debt || 0) + reqData.amount;
+                const newOrders = (data.totalOrders || 0) + 1;
+                return clientRef.update({ debt: newDebt, totalOrders: newOrders }).then(() => {
+                    return userAccRef.once('value').then(uSnap => {
+                        const uData = uSnap.val() || {};
+                        return userAccRef.update({ debt: (uData.debt || 0) + reqData.amount });
                     });
+                }).then(() => {
+                    const report = { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', requestKey: requestKey, appName: reqData.appName || '' };
+                    return db.ref('shipping_logs').push().set(report);
+                }).then(() => {
+                    sendToGoogleSheet("appendRow", { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', appName: reqData.appName || '' });
+                    notifyRequestApproved(reqData, currentLoggedStaff);
+                    alert('✅ تمت الموافقة على الطلب وتوثيق الحركة!');
+                    updateNotificationBadge();
                 });
             });
         }).catch(err => { console.error("Approve error:", err); alert("❌ خطأ: " + err.message); });
@@ -2503,9 +2415,8 @@
         if (!pendingDeleteLogKey || !pendingDeleteLogClientId) { cancelDelete(); return; }
         const logRef = db.ref('shipping_logs/' + pendingDeleteLogKey);
         const clientRef = db.ref('clients/' + pendingDeleteLogClientId);
-        let logData = null;
         logRef.once('value').then((logSnapshot) => {
-            logData = logSnapshot.val();
+            const logData = logSnapshot.val();
             return clientRef.once('value').then((snapshot) => {
                 const clientData = snapshot.val();
                 if (!clientData) { alert("خطأ: العميل غير موجود!"); cancelDelete(); return; }
@@ -2522,26 +2433,9 @@
                         const uData = uSnap.val() || {};
                         const currentUserDebt = parseFloat(uData.debt) || 0;
                         const newUserDebt = Math.max(0, currentUserDebt - pendingDeleteLogAmount);
-                        // If user paid from balance, restore balance
-                        if (logData && logData.paidFromBalance) {
-                            const currentBalance = uData.balance || 0;
-                            return userAccRef.update({ debt: newUserDebt, balance: currentBalance + pendingDeleteLogAmount });
-                        }
                         return userAccRef.update({ debt: newUserDebt });
                     });
                 }
-            }).then(() => {
-                // Restore shared staff balance
-                const newSharedBalance = sharedStaffBalance + pendingDeleteLogAmount;
-                const code = generateTxnCode();
-                const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
-                const txn = { type: 'add', amount: pendingDeleteLogAmount, code: code, date: now, description: 'إرجاع رصيد بعد حذف شحنة | العميل: ' + (logData ? logData.clientName : '') + ' (ID: ' + pendingDeleteLogClientId + ')', balanceAfter: newSharedBalance, staff: currentLoggedStaff || 'system', clientName: logData ? logData.clientName : '', clientId: pendingDeleteLogClientId };
-                return db.ref('staff_transactions').push().set(txn).then(() => {
-                    return db.ref('shared_staff_balance').set(newSharedBalance);
-                }).then(() => {
-                    sharedStaffBalance = newSharedBalance;
-                    updateStaffBalanceUI();
-                });
             }).then(() => {
                 if (logData && logData.requestKey) {
                     return db.ref('user_requests/' + logData.requestKey).remove();
@@ -2549,13 +2443,28 @@
             }).then(() => {
                 return logRef.remove();
             }).then(() => {
-                alert('✅ تم حذف الشحنة بنجاح!
-
-• خصم ' + pendingDeleteLogAmount + '$ من المديونية
-• إرجاع ' + pendingDeleteLogAmount + '$ للرصيد المشترك
-• عدد الشحنات: -1
-• تم الحذف من جميع الجداول');
+                alert('✅ تم حذف الشحنة بنجاح!\n\n• خصم ' + pendingDeleteLogAmount + '$ من المديونية\n• عدد الشحنات: -1\n• تم الحذف من جميع الجداول');
                 cancelDelete(); lookupDebtById();
             });
         }).catch((error) => { console.error("Delete error:", error); alert("❌ حدث خطأ أثناء الحذف: " + error.message); cancelDelete(); });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const overlay = document.getElementById('deleteConfirmOverlay');
+        if (overlay) overlay.addEventListener('click', function(e) { if (e.target === this) cancelDelete(); });
+        const balanceOverlay = document.getElementById('balanceModalOverlay');
+        if (balanceOverlay) balanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeBalanceModal(); });
+        const editBalanceOverlay = document.getElementById('editBalanceModalOverlay');
+        if (editBalanceOverlay) editBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeEditBalanceModal(); });
+        const staffBalanceOverlay = document.getElementById('staffBalanceModalOverlay');
+        if (staffBalanceOverlay) staffBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffBalanceModal(); });
+        const staffEditBalanceOverlay = document.getElementById('staffEditBalanceModalOverlay');
+        if (staffEditBalanceOverlay) staffEditBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffEditBalanceModal(); });
+        const staffTxnOverlay = document.getElementById('staffTxnModalOverlay');
+        if (staffTxnOverlay) staffTxnOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffTxnModal(); });
+        const userTxnOverlay = document.getElementById('userTxnModalOverlay');
+        if (userTxnOverlay) userTxnOverlay.addEventListener('click', function(e) { if (e.target === this) closeUserTxnModal(); });
+    });
+</script>
+</body>
+</html>
