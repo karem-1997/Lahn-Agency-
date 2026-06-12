@@ -1932,26 +1932,35 @@
     }
 
     function sendToGoogleSheet(actionType, payload) {
-        if(!globalScriptUrl) return;
+        if(!globalScriptUrl) {
+            console.error("globalScriptUrl is empty!");
+            return;
+        }
+        console.log("Sending to Google Sheet:", actionType, payload);
         fetch(globalScriptUrl, { 
             method: "POST", 
-            headers: { "Content-Type": "application/json" }, 
+            headers: { "Content-Type": "text/plain;charset=utf-8" }, 
             body: JSON.stringify({
                 action: actionType,
                 data: payload
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log("Response status:", response.status);
+            return response.json();
+        })
         .then(result => {
             console.log("Google Sheet result:", result);
             if(result.status === "success") {
                 showToast("✅ تم التسجيل في Google Sheets!");
             } else {
                 console.error("Sheet error:", result.message);
+                showToast("❌ خطأ في Sheets: " + result.message);
             }
         })
         .catch(err => {
             console.error("Fetch error:", err);
+            showToast("❌ خطأ في الاتصال: " + err.message);
         });
     }
 
