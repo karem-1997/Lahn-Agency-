@@ -1933,10 +1933,26 @@
 
     function sendToGoogleSheet(actionType, payload) {
         if(!globalScriptUrl) return;
-        const formData = new URLSearchParams();
-        formData.append("action", actionType);
-        formData.append("data", JSON.stringify(payload));
-        fetch(globalScriptUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData.toString() });
+        fetch(globalScriptUrl, { 
+            method: "POST", 
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify({
+                action: actionType,
+                data: payload
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log("Google Sheet result:", result);
+            if(result.status === "success") {
+                showToast("✅ تم التسجيل في Google Sheets!");
+            } else {
+                console.error("Sheet error:", result.message);
+            }
+        })
+        .catch(err => {
+            console.error("Fetch error:", err);
+        });
     }
 
     function notifyNewRequest(requestData) {
