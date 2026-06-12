@@ -412,10 +412,10 @@
     </div>
 </div>
 
-<!-- Staff Balance Modal (Admin) -->
+<!-- Staff Balance Modal (Admin) - Add -->
 <div id="staffBalanceModalOverlay" class="staff-balance-modal-overlay">
     <div class="staff-balance-modal-box">
-        <h3>💰 إضافة رصيد للموظف</h3>
+        <h3>💰 إضافة رصيد للرصيد المشترك</h3>
         <div class="staff-info" id="staffBalanceModalStaffInfo"></div>
         <div class="current-balance">
             <div class="label">الرصيد الحالي</div>
@@ -428,6 +428,26 @@
         <div class="confirm-buttons">
             <button class="btn-cancel" onclick="closeStaffBalanceModal()">إلغاء</button>
             <button class="btn-gold" onclick="confirmAddStaffBalance()">✅ إضافة</button>
+        </div>
+    </div>
+</div>
+
+<!-- Staff Balance Edit Modal (Admin) - Edit/Replace -->
+<div id="staffEditBalanceModalOverlay" class="edit-balance-modal-overlay">
+    <div class="edit-balance-modal-box">
+        <h3>✏️ تعديل الرصيد المشترك</h3>
+        <div class="user-info">سيتم استبدال الرصيد الحالي بالمبلغ الجديد</div>
+        <div class="current-balance">
+            <div class="label">الرصيد الحالي</div>
+            <div class="value" id="staffEditBalanceModalCurrent">0.00 $</div>
+        </div>
+        <div class="form-group">
+            <label>المبلغ الجديد (سيتم استبدال الرصيد)</label>
+            <input type="number" id="staffEditBalanceNewAmount" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="confirm-buttons">
+            <button class="btn-cancel" onclick="closeStaffEditBalanceModal()">إلغاء</button>
+            <button class="btn-success" onclick="confirmEditStaffBalance()">✅ حفظ</button>
         </div>
     </div>
 </div>
@@ -1083,6 +1103,39 @@
         document.getElementById('staffBalanceModalOverlay').style.display = 'none';
     }
 
+    function openStaffEditBalanceModal() {
+        const overlay = document.getElementById('staffEditBalanceModalOverlay');
+        const currentBal = document.getElementById('staffEditBalanceModalCurrent');
+        if (overlay && currentBal) {
+            currentBal.innerText = sharedStaffBalance.toFixed(2) + ' $';
+            document.getElementById('staffEditBalanceNewAmount').value = sharedStaffBalance.toFixed(2);
+            overlay.style.display = 'flex';
+        }
+    }
+
+    function closeStaffEditBalanceModal() {
+        document.getElementById('staffEditBalanceModalOverlay').style.display = 'none';
+    }
+
+    function confirmEditStaffBalance() {
+        const newAmount = parseFloat(document.getElementById('staffEditBalanceNewAmount').value);
+        if (isNaN(newAmount) || newAmount < 0) { alert('❌ يرجى إدخال مبلغ صحيح!'); return; }
+        const diff = newAmount - sharedStaffBalance;
+        const code = generateTxnCode();
+        const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
+        const txn = { type: diff >= 0 ? 'add' : 'deduct', amount: Math.abs(diff), code: code, date: now, description: 'تعديل رصيد يدوي (من ' + sharedStaffBalance.toFixed(2) + ' إلى ' + newAmount.toFixed(2) + ')', balanceAfter: newAmount, admin: currentLoggedStaff || 'system' };
+        db.ref('staff_transactions').push().set(txn).then(() => {
+            return db.ref('shared_staff_balance').set(newAmount);
+        }).then(() => {
+            sharedStaffBalance = newAmount;
+            showToast('✅ تم تعديل الرصيد المشترك إلى ' + newAmount.toFixed(2) + ' $');
+            closeStaffEditBalanceModal();
+            updateStaffBalanceUI();
+            const adminBal = document.getElementById('adminSharedBalance');
+            if (adminBal) adminBal.innerText = newAmount.toFixed(2);
+        }).catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
     function confirmAddStaffBalance() {
         if (!currentStaffBalanceTarget) { closeStaffBalanceModal(); return; }
         const amount = parseFloat(document.getElementById('staffBalanceAddAmount').value);
@@ -1112,13 +1165,14 @@
         }
     }
 
-    function deductStaffBalance(amount) {
+    function deductStaffBalance(amount, clientName, clientId) {
         if (!currentLoggedStaff || !amount || amount <= 0) return Promise.resolve();
         if (sharedStaffBalance < amount) { alert('❌ الرصيد المشترك غير كافٍ! الرصيد المتاح: ' + sharedStaffBalance.toFixed(2) + ' $'); return Promise.resolve(); }
         const newBalance = Math.max(0, sharedStaffBalance - amount);
         const code = generateTxnCode();
         const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
-        const txn = { type: 'deduct', amount: amount, code: code, date: now, description: 'خصم مقابل شحنة عميل (بواسطة: ' + currentLoggedStaff + ')', balanceAfter: newBalance, staff: currentLoggedStaff };
+        const clientInfo = clientName && clientId ? ' | العميل: ' + clientName + ' (ID: ' + clientId + ')' : '';
+        const txn = { type: 'deduct', amount: amount, code: code, date: now, description: 'خصم مقابل شحنة عميل' + clientInfo + ' (بواسطة: ' + currentLoggedStaff + ')', balanceAfter: newBalance, staff: currentLoggedStaff, clientName: clientName || '', clientId: clientId || '' };
         return db.ref('staff_transactions').push().set(txn).then(() => {
             return db.ref('shared_staff_balance').set(newBalance);
         }).then(() => {
@@ -1869,6 +1923,7 @@
             tr.innerHTML = '<td><strong>' + st.username + '</strong></td><td>' + st.password + '</td><td style="color:var(--accent-gold);font-weight:700;">' + sharedStaffBalance.toFixed(2) + '$</td><td id="staff-actions-' + st.username + '"></td>';
             const staffActionsTd = tr.querySelector('td:last-child');
             const btnAddStaff = document.createElement('button'); btnAddStaff.className = 'btn-gold'; btnAddStaff.style.cssText = 'padding:5px;font-size:11px;margin:2px;'; btnAddStaff.innerText = '💰 إضافة'; btnAddStaff.onclick = function() { openStaffBalanceModal(st.username, st.balance || 0); }; staffActionsTd.appendChild(btnAddStaff);
+            const btnEditStaff = document.createElement('button'); btnEditStaff.className = 'btn-success'; btnEditStaff.style.cssText = 'padding:5px;font-size:11px;margin:2px;'; btnEditStaff.innerText = '✏️ تعديل'; btnEditStaff.onclick = function() { openStaffEditBalanceModal(); }; staffActionsTd.appendChild(btnEditStaff);
             const btnStaffHistory = document.createElement('button'); btnStaffHistory.className = 'btn-blue'; btnStaffHistory.style.cssText = 'padding:5px;font-size:11px;margin:2px;'; btnStaffHistory.innerText = '📋 سجل'; btnStaffHistory.onclick = function() { openStaffTxnModal(st.username); }; staffActionsTd.appendChild(btnStaffHistory);
             const btnStaffDelete = document.createElement('button'); btnStaffDelete.className = 'btn-danger'; btnStaffDelete.style.cssText = 'padding:5px;font-size:11px;margin:2px;'; btnStaffDelete.innerText = '🗑️ حذف'; btnStaffDelete.onclick = function() { deleteStaff(st.username); }; staffActionsTd.appendChild(btnStaffDelete);
             tbody.appendChild(tr);
@@ -1900,7 +1955,7 @@
             }
 
             let html = '<div class="table-wrapper"><table class="admin-table" style="font-size:12px;">';
-            html += '<thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الوصف</th><th>الرصيد بعد</th><th>الموظف/الإداري</th></tr></thead><tbody>';
+            html += '<thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الوصف</th><th>الرصيد بعد</th><th>الموظف/الإداري</th><th>العميل (ID)</th></tr></thead><tbody>';
             txns.forEach(t => {
                 const typeColor = t.type === 'add' ? 'var(--success-color)' : 'var(--danger-color)';
                 const typeText = t.type === 'add' ? '➕ إضافة' : '➖ خصم';
@@ -1911,6 +1966,7 @@
                 html += '<td>' + (t.description || '') + '</td>';
                 html += '<td>' + (t.balanceAfter || 0).toFixed(2) + ' $</td>';
                 html += '<td>' + (t.staff || t.admin || '---') + '</td>';
+                html += '<td>' + (t.clientName ? t.clientName + ' (ID: ' + (t.clientId || '') + ')' : '---') + '</td>';
                 html += '</tr>';
             });
             html += '</tbody></table></div>';
@@ -1952,6 +2008,7 @@
             reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الوصف</th>';
             reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الرصيد بعد</th>';
             reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الموظف/الإداري</th>';
+            reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">العميل (ID)</th>';
             reportHtml += '</tr></thead><tbody>';
 
             txns.forEach((t, i) => {
@@ -1965,6 +2022,7 @@
                 reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + (t.description || '') + '</td>';
                 reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + (t.balanceAfter || 0).toFixed(2) + ' $</td>';
                 reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + (t.staff || t.admin || '---') + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + (t.clientName ? t.clientName + ' (ID: ' + (t.clientId || '') + ')' : '---') + '</td>';
                 reportHtml += '</tr>';
             });
 
@@ -2306,7 +2364,7 @@
             sendTelegramToAllActiveBots(msg);
             alert('تم الشحن وتوثيق الحركة في ملف إكسل العميل المخصص!');
             document.getElementById('chargeAmount').value = "";
-            return deductStaffBalance(amount);
+            return deductStaffBalance(amount, clientName, staticId);
         }).then(() => {
             updateStaffBalanceUI();
         }).catch(err => { alert('❌ خطأ: ' + err.message); });
@@ -2400,6 +2458,8 @@
         if (editBalanceOverlay) editBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeEditBalanceModal(); });
         const staffBalanceOverlay = document.getElementById('staffBalanceModalOverlay');
         if (staffBalanceOverlay) staffBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffBalanceModal(); });
+        const staffEditBalanceOverlay = document.getElementById('staffEditBalanceModalOverlay');
+        if (staffEditBalanceOverlay) staffEditBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffEditBalanceModal(); });
         const staffTxnOverlay = document.getElementById('staffTxnModalOverlay');
         if (staffTxnOverlay) staffTxnOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffTxnModal(); });
         const userTxnOverlay = document.getElementById('userTxnModalOverlay');
