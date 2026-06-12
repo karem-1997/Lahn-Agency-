@@ -793,13 +793,19 @@
             </form>
         </div>
 
-        <h3 style="color: var(--warning-color); font-size: 16px; margin-top:15px;">حسابات المستخدمين (البوابة):</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:15px;">
+            <h3 style="color: var(--warning-color); font-size: 16px; margin:0;">حسابات المستخدمين (البوابة):</h3>
+            <button class="btn-danger" style="padding:8px 14px;font-size:12px;width:auto;" onclick="clearAllUserTransactions()">🗑️ تصفير سجل المستخدمين</button>
+        </div>
         <div class="table-wrapper"><table class="admin-table"><thead><tr><th>الاسم</th><th>ID</th><th>الباسورد</th><th>الرصيد</th><th>المديونية</th><th>إجراء</th></tr></thead><tbody id="userAccountsTableBody"></tbody></table></div>
 
         <div class="box-light" style="border: 1px solid var(--accent-blue); margin-top: 20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <h3 style="color: var(--accent-blue); margin:0;">📊 تقرير استخدام الرصيد المشترك</h3>
-                <button class="admin-download-btn" onclick="downloadStaffUsageReport()">📥 تحميل الفاتورة</button>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button class="admin-download-btn" onclick="downloadStaffUsageReport()">📥 تحميل الفاتورة</button>
+                    <button class="btn-danger" style="padding:8px 14px;font-size:12px;width:auto;" onclick="clearAllStaffTransactions()">🗑️ تصفير سجل الموظفين</button>
+                </div>
             </div>
             <div id="staffUsageSummary" style="margin: 15px 0; padding: 12px; background: var(--glass-bg); border-radius: 12px;">
                 <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px;">
@@ -1665,24 +1671,77 @@
             if(!client) { alert("خطأ: العميل غير موجود في قاعدة البيانات!"); return; }
             const clientRef = db.ref('clients/' + client._key);
             const userAccRef = db.ref('user_accounts/' + reqData.userKey);
-            return clientRef.once('value').then(snap => {
-                const data = snap.val();
-                const newDebt = (data.debt || 0) + reqData.amount;
-                const newOrders = (data.totalOrders || 0) + 1;
-                return clientRef.update({ debt: newDebt, totalOrders: newOrders }).then(() => {
-                    return userAccRef.once('value').then(uSnap => {
-                        const uData = uSnap.val() || {};
-                        return userAccRef.update({ debt: (uData.debt || 0) + reqData.amount });
+            let userBalanceDeducted = false;
+            let deductAmountFromUser = 0;
+
+            return userAccRef.once('value').then(uSnap => {
+                const uData = uSnap.val() || {};
+                const currentUserBalance = uData.balance || 0;
+
+                // Deduct from user balance if they have enough, otherwise add to debt
+                if (currentUserBalance >= reqData.amount) {
+                    // User has enough balance - deduct from balance
+                    const newUserBalance = currentUserBalance - reqData.amount;
+                    userBalanceDeducted = true;
+                    deductAmountFromUser = reqData.amount;
+
+                    // Record user transaction (deduct)
+                    const code = generateTxnCode();
+                    const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
+                    const txn = { type: 'deduct', amount: reqData.amount, code: code, date: now, description: 'خصم مقابل شحنة معتمدة (طلب #' + requestKey.substring(0, 6) + ')', balanceAfter: newUserBalance, admin: currentLoggedStaff };
+
+                    return db.ref('user_transactions/' + reqData.userKey).push().set(txn).then(() => {
+                        return userAccRef.update({ balance: newUserBalance });
                     });
-                }).then(() => {
-                    const report = { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', requestKey: requestKey, appName: reqData.appName || '' };
-                    return db.ref('shipping_logs').push().set(report);
-                }).then(() => {
-                    sendToGoogleSheet("appendRow", { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', appName: reqData.appName || '' });
-                    notifyRequestApproved(reqData, currentLoggedStaff);
-                    alert('✅ تمت الموافقة على الطلب وتوثيق الحركة!');
-                    updateNotificationBadge();
+                } else if (currentUserBalance > 0) {
+                    // Partial balance - deduct what they have, rest goes to debt
+                    const remaining = reqData.amount - currentUserBalance;
+                    const newUserBalance = 0;
+                    userBalanceDeducted = true;
+                    deductAmountFromUser = currentUserBalance;
+
+                    // Record user transaction (deduct partial)
+                    const code = generateTxnCode();
+                    const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
+                    const txn = { type: 'deduct', amount: currentUserBalance, code: code, date: now, description: 'خصم جزئي مقابل شحنة (طلب #' + requestKey.substring(0, 6) + ') - المتبقي ' + remaining.toFixed(2) + ' $ مديونية', balanceAfter: 0, admin: currentLoggedStaff };
+
+                    return db.ref('user_transactions/' + reqData.userKey).push().set(txn).then(() => {
+                        return userAccRef.update({ balance: 0, debt: (uData.debt || 0) + remaining });
+                    });
+                } else {
+                    // No balance - full amount goes to debt
+                    return userAccRef.update({ debt: (uData.debt || 0) + reqData.amount });
+                }
+            }).then(() => {
+                // Update client debt and orders
+                return clientRef.once('value').then(snap => {
+                    const data = snap.val();
+                    const newDebt = (data.debt || 0) + reqData.amount;
+                    const newOrders = (data.totalOrders || 0) + 1;
+                    return clientRef.update({ debt: newDebt, totalOrders: newOrders });
                 });
+            }).then(() => {
+                // Deduct from shared staff balance
+                return deductStaffBalance(reqData.amount, reqData.userName, reqData.userId);
+            }).then(() => {
+                const report = { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', requestKey: requestKey, appName: reqData.appName || '', userBalanceDeducted: userBalanceDeducted, deductAmountFromUser: deductAmountFromUser };
+                return db.ref('shipping_logs').push().set(report);
+            }).then(() => {
+                sendToGoogleSheet("appendRow", { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', appName: reqData.appName || '' });
+                notifyRequestApproved(reqData, currentLoggedStaff);
+
+                let msg = '✅ تمت الموافقة على الطلب وتوثيق الحركة!';
+                if (userBalanceDeducted && deductAmountFromUser >= reqData.amount) {
+                    msg += '\n💰 تم خصم ' + reqData.amount.toFixed(2) + ' $ من رصيد المستخدم.';
+                } else if (userBalanceDeducted && deductAmountFromUser > 0) {
+                    msg += '\n💰 تم خصم ' + deductAmountFromUser.toFixed(2) + ' $ من الرصيد والباقي مديونية.';
+                } else {
+                    msg += '\n⚠️ المستخدم ليس لديه رصيد - تمت إضافة المبلغ كمديونية.';
+                }
+                msg += '\n📊 تم خصم ' + reqData.amount.toFixed(2) + ' $ من الرصيد المشترك للموظفين.';
+
+                alert(msg);
+                updateNotificationBadge();
             });
         }).catch(err => { console.error("Approve error:", err); alert("❌ خطأ: " + err.message); });
     }
@@ -2447,6 +2506,26 @@
                 cancelDelete(); lookupDebtById();
             });
         }).catch((error) => { console.error("Delete error:", error); alert("❌ حدث خطأ أثناء الحذف: " + error.message); cancelDelete(); });
+    }
+
+    // ==================== CLEAR ALL TRANSACTIONS ====================
+    function clearAllStaffTransactions() {
+        if(!confirm("⚠️ هل أنت متأكد من تصفير سجل معاملات الرصيد المشترك للموظفين؟\n\nسيتم:\n• حذف جميع عمليات الإضافة والخصم\n• تصفير عدد العمليات\n\n⚠️ لا يمكن التراجع عن هذا الإجراء!")) return;
+        if(!confirm("🔴 تأكيد نهائي: هل تريد فعلاً حذف جميع سجلات معاملات الموظفين؟")) return;
+
+        db.ref('staff_transactions').remove().then(() => {
+            showToast('✅ تم تصفير سجل معاملات الرصيد المشترك بنجاح!');
+            loadStaffUsageReport();
+        }).catch(err => { alert('❌ خطأ: ' + err.message); });
+    }
+
+    function clearAllUserTransactions() {
+        if(!confirm("⚠️ هل أنت متأكد من تصفير سجل معاملات رصيد جميع المستخدمين؟\n\nسيتم:\n• حذف جميع عمليات الإضافة والخصم لكل المستخدمين\n\n⚠️ لا يمكن التراجع عن هذا الإجراء!")) return;
+        if(!confirm("🔴 تأكيد نهائي: هل تريد فعلاً حذف جميع سجلات معاملات المستخدمين؟")) return;
+
+        db.ref('user_transactions').remove().then(() => {
+            showToast('✅ تم تصفير سجل معاملات جميع المستخدمين بنجاح!');
+        }).catch(err => { alert('❌ خطأ: ' + err.message); });
     }
 
     document.addEventListener('DOMContentLoaded', function() {
