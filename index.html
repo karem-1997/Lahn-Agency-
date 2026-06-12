@@ -118,8 +118,8 @@
         .admin-table tr { transition: all 0.3s ease; }
         .admin-table tr:hover { background: rgba(255,26,26,0.05); }
         .admin-table td { background: var(--glass-bg); font-size: 13px; }
-        .admin-table td:last-child { min-width: 160px; white-space: nowrap; text-align: center; }
-        .admin-table td:last-child button { display: inline-block !important; visibility: visible !important; opacity: 1 !important; margin: 2px; padding: 6px 10px; font-size: 12px; min-width: 65px; }
+        .admin-table td:last-child { min-width: 200px; white-space: normal; text-align: center; }
+        .admin-table td:last-child button { display: inline-block !important; visibility: visible !important; opacity: 1 !important; margin: 2px; padding: 6px 10px; font-size: 12px; min-width: 60px; }
         .excel-box { margin-top: 20px; border: 2px solid var(--primary-color); border-radius: 16px; overflow: hidden; background: #fff; display: none; box-shadow: 0 0 30px rgba(255,26,26,0.2); }
         .excel-box iframe { width: 100%; height: 350px; border: none; }
         ::-webkit-scrollbar { width: 6px; }
@@ -188,9 +188,10 @@
         .empty-state { text-align: center; padding: 35px 15px; color: var(--text-secondary); }
         .empty-state .empty-icon { font-size: 48px; margin-bottom: 14px; opacity: 0.5; }
         .empty-state p { font-size: 14px; }
-        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -5px; padding: 0 5px; }
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -5px; padding: 0 5px; position: relative; }
         .table-wrapper::-webkit-scrollbar { height: 4px; }
         .table-wrapper::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 2px; }
+        .table-wrapper table { min-width: 100%; }
         /* ====== APPS GRID ====== */
         .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 14px; margin: 20px 0; }
         .app-card { background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 16px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; }
@@ -336,8 +337,8 @@
             .date-filter-row{flex-direction:column} .date-filter-row .form-group{min-width:100%}
             .flex-group{flex-direction:column} .flex-group > *{width:100%;min-width:100%}
             .admin-table{font-size:12px} .admin-table th,.admin-table td{padding:8px 4px} .admin-table th{font-size:10px;letter-spacing:0}
-            .admin-table td{font-size:12px} .admin-table td:last-child{min-width:140px;padding:6px 4px}
-            .admin-table td:last-child button{padding:5px 8px;font-size:11px;min-width:55px;margin:1px}
+            .admin-table td{font-size:12px} .admin-table td:last-child{min-width:180px;padding:6px 4px}
+            .admin-table td:last-child button{padding:5px 8px;font-size:10px;min-width:50px;margin:1px}
             button{padding:12px;font-size:14px} input,select{padding:12px;font-size:14px}
             .badge{font-size:12px;padding:12px} .box-light{padding:14px} .search-container{padding:14px}
             .user-request-form{padding:16px} .balance-display .balance-value{font-size:28px}
@@ -348,7 +349,7 @@
         }
         @media (max-width:380px) {
             .admin-table{font-size:11px} .admin-table th,.admin-table td{padding:6px 3px}
-            .admin-table td:last-child{min-width:120px} .admin-table td:last-child button{padding:4px 6px;font-size:10px;min-width:50px}
+            .admin-table td:last-child{min-width:160px} .admin-table td:last-child button{padding:4px 6px;font-size:9px;min-width:45px}
             h2{font-size:17px} .container{padding:14px}
             .apps-grid{grid-template-columns:repeat(3,1fr);gap:8px}
             .app-card{padding:10px 6px} .app-card .app-icon{width:40px;height:40px}
@@ -505,7 +506,7 @@
 
         <!-- Staff Balance Display -->
         <div id="staffBalanceBox" class="staff-balance-box">
-            <div class="staff-balance-label">💰 رصيدك المتاح</div>
+            <div class="staff-balance-label">💰 الرصيد المشترك المتاح</div>
             <div class="staff-balance-value" id="staffBalanceValue">0.00</div>
             <div class="staff-balance-currency">دولار أمريكي</div>
         </div>
@@ -741,6 +742,15 @@
 
         <div id="excelBox" class="excel-box"><h3 style="color:#000; background:#f4f4f5; padding:10px; font-size:14px; text-align:right;">📊 لوحة مراقبة الحسابات:</h3><iframe id="excelIframe" src=""></iframe></div>
 
+        <div class="box-light" style="border: 2px solid var(--accent-gold); margin-top:20px;">
+            <h3 style="color: var(--accent-gold);">💰 الرصيد المشترك للموظفين</h3>
+            <div style="text-align: center; padding: 15px;">
+                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">الرصيد المتاح للجميع</div>
+                <div style="font-size: 42px; font-weight: 800; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,215,0,0.5);" id="adminSharedBalance">0.00</div>
+                <div style="font-size: 16px; color: var(--text-secondary);">دولار أمريكي</div>
+            </div>
+        </div>
+
         <div class="box-light" style="margin-top:20px;">
             <h3>👔 إضافة موظف جديد</h3>
             <form id="addStaffForm" onsubmit="handleCreateStaff(event)">
@@ -751,7 +761,7 @@
         </div>
 
         <h3 style="color: var(--primary-color); font-size: 16px; margin-top:15px;">الموظفون الحاليون:</h3>
-        <div class="table-wrapper"><table class="admin-table"><thead><tr><th>الموظف</th><th>الباسورد</th><th>الرصيد</th><th>إجراء</th></tr></thead><tbody id="staffTableBody"></tbody></table></div>
+        <div class="table-wrapper"><table class="admin-table"><thead><tr><th>الموظف</th><th>الباسورد</th><th>الرصيد المشترك</th><th>إجراء</th></tr></thead><tbody id="staffTableBody"></tbody></table></div>
 
         <div class="box-light" style="margin-top:20px; border: 1px solid var(--warning-color);">
             <h3>👤 إنشاء حساب مستخدم جديد (للبوابة)</h3>
@@ -765,6 +775,34 @@
 
         <h3 style="color: var(--warning-color); font-size: 16px; margin-top:15px;">حسابات المستخدمين (البوابة):</h3>
         <div class="table-wrapper"><table class="admin-table"><thead><tr><th>الاسم</th><th>ID</th><th>الباسورد</th><th>الرصيد</th><th>المديونية</th><th>إجراء</th></tr></thead><tbody id="userAccountsTableBody"></tbody></table></div>
+
+        <div class="box-light" style="border: 1px solid var(--accent-blue); margin-top: 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <h3 style="color: var(--accent-blue); margin:0;">📊 تقرير استخدام الرصيد المشترك</h3>
+                <button class="admin-download-btn" onclick="downloadStaffUsageReport()">📥 تحميل الفاتورة</button>
+            </div>
+            <div id="staffUsageSummary" style="margin: 15px 0; padding: 12px; background: var(--glass-bg); border-radius: 12px;">
+                <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 12px; color: var(--text-secondary);">الرصيد الحالي</div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--accent-gold);" id="reportCurrentBalance">0.00 $</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 12px; color: var(--text-secondary);">إجمالي الإضافات</div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--success-color);" id="reportTotalAdded">0.00 $</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 12px; color: var(--text-secondary);">إجمالي الخصومات</div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--danger-color);" id="reportTotalDeducted">0.00 $</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 12px; color: var(--text-secondary);">عدد العمليات</div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--primary-color);" id="reportTotalOperations">0</div>
+                    </div>
+                </div>
+            </div>
+            <div id="staffUsageTable"></div>
+        </div>
 
         <button type="button" class="btn-secondary" onclick="backToLoginOrDash()" style="margin-top: 25px;">رجوع</button>
     </div>
@@ -806,6 +844,7 @@
     let availableApps = [];
     let selectedApp = null;
     let currentBalanceTarget = null;
+    let sharedStaffBalance = 0;
 
     function createParticles() {
         const container = document.getElementById('particles');
@@ -1032,8 +1071,8 @@
         const staffInfo = document.getElementById('staffBalanceModalStaffInfo');
         const currentBal = document.getElementById('staffBalanceModalCurrent');
         if (overlay && staffInfo && currentBal) {
-            staffInfo.innerText = 'الموظف: ' + staffUsername;
-            currentBal.innerText = (currentBalance || 0).toFixed(2) + ' $';
+            staffInfo.innerText = 'إضافة رصيد للرصيد المشترك (الموظف: ' + staffUsername + ')';
+            currentBal.innerText = sharedStaffBalance.toFixed(2) + ' $';
             document.getElementById('staffBalanceAddAmount').value = '';
             overlay.style.display = 'flex';
         }
@@ -1048,51 +1087,43 @@
         if (!currentStaffBalanceTarget) { closeStaffBalanceModal(); return; }
         const amount = parseFloat(document.getElementById('staffBalanceAddAmount').value);
         if (!amount || amount <= 0) { alert('❌ يرجى إدخال مبلغ صحيح!'); return; }
-        const staffRef = db.ref('staff/' + currentStaffBalanceTarget);
-        staffRef.once('value').then(snap => {
-            const data = snap.val() || {};
-            const newBalance = (data.balance || 0) + amount;
-            const code = generateTxnCode();
-            const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
-            const txn = { type: 'add', amount: amount, code: code, date: now, description: 'إضافة رصيد من الإدارة', balanceAfter: newBalance, admin: currentLoggedStaff || 'system' };
-            return db.ref('staff_transactions/' + currentStaffBalanceTarget).push().set(txn).then(() => {
-                return staffRef.update({ balance: newBalance });
-            });
+        const newBalance = sharedStaffBalance + amount;
+        const code = generateTxnCode();
+        const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
+        const txn = { type: 'add', amount: amount, code: code, date: now, description: 'إضافة رصيد للرصيد المشترك (بواسطة: ' + currentStaffBalanceTarget + ')', balanceAfter: newBalance, admin: currentLoggedStaff || 'system' };
+        db.ref('staff_transactions').push().set(txn).then(() => {
+            return db.ref('shared_staff_balance').set(newBalance);
         }).then(() => {
-            showToast('✅ تم إضافة ' + amount.toFixed(2) + ' $ لرصيد الموظف!');
+            sharedStaffBalance = newBalance;
+            showToast('✅ تم إضافة ' + amount.toFixed(2) + ' $ للرصيد المشترك! الرصيد الجديد: ' + newBalance.toFixed(2) + ' $');
             closeStaffBalanceModal();
+            updateStaffBalanceUI();
         }).catch(err => { alert('❌ خطأ: ' + err.message); });
     }
 
     function updateStaffBalanceUI() {
         if (!currentLoggedStaff) return;
-        const staff = staffAccounts.find(s => s.username === currentLoggedStaff);
-        if (!staff) return;
-        const balance = staff.balance || 0;
         const balanceEl = document.getElementById('staffBalanceValue');
         const boxEl = document.getElementById('staffBalanceBox');
-        if (balanceEl) balanceEl.innerText = balance.toFixed(2);
+        if (balanceEl) balanceEl.innerText = sharedStaffBalance.toFixed(2);
         if (boxEl) {
-            if (balance <= 0) { boxEl.classList.add('staff-balance-low', 'staff-balance-zero'); }
+            if (sharedStaffBalance <= 0) { boxEl.classList.add('staff-balance-low', 'staff-balance-zero'); }
             else { boxEl.classList.remove('staff-balance-low', 'staff-balance-zero'); }
         }
     }
 
     function deductStaffBalance(amount) {
         if (!currentLoggedStaff || !amount || amount <= 0) return Promise.resolve();
-        const staff = staffAccounts.find(s => s.username === currentLoggedStaff);
-        if (!staff) return Promise.resolve();
-        const staffRef = db.ref('staff/' + currentLoggedStaff);
-        return staffRef.once('value').then(snap => {
-            const data = snap.val() || {};
-            const currentBalance = data.balance || 0;
-            const newBalance = Math.max(0, currentBalance - amount);
-            const code = generateTxnCode();
-            const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
-            const txn = { type: 'deduct', amount: amount, code: code, date: now, description: 'خصم مقابل شحنة عميل', balanceAfter: newBalance, admin: 'system_auto' };
-            return db.ref('staff_transactions/' + currentLoggedStaff).push().set(txn).then(() => {
-                return staffRef.update({ balance: newBalance });
-            });
+        if (sharedStaffBalance < amount) { alert('❌ الرصيد المشترك غير كافٍ! الرصيد المتاح: ' + sharedStaffBalance.toFixed(2) + ' $'); return Promise.resolve(); }
+        const newBalance = Math.max(0, sharedStaffBalance - amount);
+        const code = generateTxnCode();
+        const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
+        const txn = { type: 'deduct', amount: amount, code: code, date: now, description: 'خصم مقابل شحنة عميل (بواسطة: ' + currentLoggedStaff + ')', balanceAfter: newBalance, staff: currentLoggedStaff };
+        return db.ref('staff_transactions').push().set(txn).then(() => {
+            return db.ref('shared_staff_balance').set(newBalance);
+        }).then(() => {
+            sharedStaffBalance = newBalance;
+            updateStaffBalanceUI();
         });
     }
 
@@ -1195,10 +1226,10 @@
         const overlay = document.getElementById('staffTxnModalOverlay');
         const header = document.getElementById('staffTxnHeader');
         const list = document.getElementById('staffTxnList');
-        if (header) header.innerText = 'الموظف: ' + staffUsername;
+        if (header) header.innerText = 'سجل معاملات الرصيد المشترك (الموظف: ' + staffUsername + ')';
         if (list) list.innerHTML = '<div class="txn-empty">⏳ جاري التحميل...</div>';
         if (overlay) overlay.style.display = 'flex';
-        db.ref('staff_transactions/' + staffUsername).once('value').then(snapshot => {
+        db.ref('staff_transactions').once('value').then(snapshot => {
             let txns = [];
             snapshot.forEach(child => { let t = child.val(); t._key = child.key; txns.push(t); });
             txns.sort((a, b) => { const da = parseLogDate(a.date) || new Date(0); const db2 = parseLogDate(b.date) || new Date(0); return db2 - da; });
@@ -1225,7 +1256,7 @@
         let reportHtml = '<div id="pdf-report" style="width:210mm;padding:15mm;background:#ffffff;direction:rtl;font-family:Arial,sans-serif;color:#000;box-sizing:border-box;">';
         reportHtml += '<div style="text-align:center;margin-bottom:15px;">';
         reportHtml += '<h2 style="color:#cc0000;margin:0;font-size:22px;">Ali Recharge Agency</h2>';
-        reportHtml += '<h3 style="color:#333;margin:5px 0;font-size:16px;">فاتورة معاملات رصيد الموظف</h3>';
+        reportHtml += '<h3 style="color:#333;margin:5px 0;font-size:16px;">فاتورة معاملات الرصيد المشترك</h3>';
         reportHtml += '<p style="color:#666;font-size:12px;margin:5px 0;">' + headerText + '</p>';
         reportHtml += '<p style="color:#666;font-size:12px;margin:5px 0;">تاريخ الفاتورة: ' + new Date().toLocaleDateString('en-US') + '</p>';
         reportHtml += '<hr style="border:1px solid #cc0000;margin:10px 0;"></div>';
@@ -1430,8 +1461,8 @@
         snapshot.forEach(child => {
             let ua = child.val(); ua._key = child.key; userAccounts.push(ua);
             if(tbody) tbody.innerHTML += '<tr><td>' + ua.name + '</td><td>' + ua.id + '</td><td>' + ua.password + '</td><td style="color:var(--success-color);font-weight:700;">' + (ua.balance || 0) + '$</td><td>' + (ua.debt || 0) + '$</td>' +
-            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">💰 إضافة</button>' + '<button class="btn-blue" style="padding:5px;font-size:11px;" onclick="openEditBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">✏️ تعديل</button>' + '<button class="btn-warning" style="padding:5px;font-size:11px;" onclick="openUserTxnModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">📋 سجل</button>' +
-            '<button class="btn-danger" style="padding:5px;font-size:11px;" onclick="deleteUserAccount(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">🗑️ حذف</button></td></tr>';
+            '<td><button class="btn-gold" style="padding:5px;font-size:11px;margin:2px;" onclick="openBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">💰 إضافة</button>' + '<button class="btn-blue" style="padding:5px;font-size:11px;margin:2px;" onclick="openEditBalanceModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;,' + (ua.balance || 0) + ')">✏️ تعديل</button>' + '<button class="btn-warning" style="padding:5px;font-size:11px;margin:2px;" onclick="openUserTxnModal(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">📋 سجل</button>' +
+            '<button class="btn-danger" style="padding:5px;font-size:11px;margin:2px;" onclick="deleteUserAccount(&quot;' + child.key + '&quot;,&quot;' + ua.name + '&quot;)">🗑️ حذف</button></td></tr>';
         });
         if(currentLoggedUser) {
             const updated = userAccounts.find(u => u._key === currentLoggedUser._key);
@@ -1443,7 +1474,14 @@
         staffAccounts = [];
         snapshot.forEach(child => { staffAccounts.push(child.val()); });
         renderStaffTable();
-        if(staffAccounts.length === 0) db.ref('staff/كريم').set({ username: "كريم", password: "123", balance: 0 });
+        if(staffAccounts.length === 0) db.ref('staff/كريم').set({ username: "كريم", password: "123" });
+    });
+
+    db.ref('shared_staff_balance').on('value', snapshot => {
+        sharedStaffBalance = snapshot.val() || 0;
+        updateStaffBalanceUI();
+        const adminBal = document.getElementById('adminSharedBalance');
+        if (adminBal) adminBal.innerText = sharedStaffBalance.toFixed(2);
     });
 
     db.ref('settings').on('value', snapshot => {
@@ -1709,8 +1747,7 @@
         if(currentLoginType === 'staff') {
             const match = staffAccounts.find(s => s.username === user && s.password === pass);
             if (match) {
-                const staffBalance = match.balance || 0;
-                if (staffBalance <= 0) {
+                if (sharedStaffBalance <= 0) {
                     document.getElementById('loginBlockedMsg').classList.add('active');
                     return;
                 }
@@ -1747,8 +1784,41 @@
     }
 
     function deleteClient(key, name) {
-        if(confirm("هل أنت متأكد من حذف العميل: " + name + " نهائياً؟")) { db.ref('clients/' + key).remove(); alert("تم حذف العميل!"); }
-    }
+    if(!confirm("⚠️ هل أنت متأكد من حذف العميل: " + name + " نهائياً؟\n\nسيتم حذف:\n• بيانات العميل\n• الحساب المرتبط (إن وجد)\n• الطلبات\n• سجل المعاملات")) return;
+
+    db.ref('clients/' + key).once('value').then(snap => {
+        const clientData = snap.val();
+        const clientId = clientData ? clientData.id : null;
+        const promises = [];
+
+        // 1. Delete from clients
+        promises.push(db.ref('clients/' + key).remove());
+
+        // 2. Delete associated user account if exists
+        if (clientId) {
+            const userAcc = userAccounts.find(u => u.id === clientId);
+            if (userAcc && userAcc._key) {
+                promises.push(db.ref('user_accounts/' + userAcc._key).remove());
+                // 3. Delete user transactions
+                promises.push(db.ref('user_transactions/' + userAcc._key).remove());
+                // 4. Delete user requests
+                promises.push(
+                    db.ref('user_requests').orderByChild('userKey').equalTo(userAcc._key).once('value').then(reqSnap => {
+                        const reqPromises = [];
+                        reqSnap.forEach(child => { reqPromises.push(db.ref('user_requests/' + child.key).remove()); });
+                        return Promise.all(reqPromises);
+                    })
+                );
+            }
+        }
+
+        return Promise.all(promises);
+    }).then(() => {
+        showToast("✅ تم حذف العميل وكل بياناته نهائياً!");
+    }).catch(err => {
+        alert("❌ خطأ أثناء الحذف: " + err.message);
+    });
+}
 
     function searchByIdDirectly() {
         const id = document.getElementById('idSearchInput').value.trim();
@@ -1789,25 +1859,145 @@
         sendTelegramToAllActiveBots(message);
     }
 
-    function openAdminPanel() {
-        if (prompt("الباسورد السري للمدير:") === "1987") {
-            document.querySelectorAll('.form-page').forEach(p => p.classList.remove('active'));
-            document.getElementById('adminPanelPage').classList.add('active');
-        } else { alert("مرفوض!"); }
-    }
+    
 
     function renderStaffTable() {
         const tbody = document.getElementById('staffTableBody');
         tbody.innerHTML = "";
         staffAccounts.forEach((st) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = '<td><strong>' + st.username + '</strong></td><td>' + st.password + '</td>' +
-            '<td style="color:var(--accent-gold);font-weight:700;">' + (st.balance || 0) + '$</td>' +
-            '<td><button class="btn-gold" style="padding:5px;font-size:11px;" onclick="openStaffBalanceModal(&quot;' + st.username + '&quot;,' + (st.balance || 0) + ')">💰 إضافة</button>' +
-            '<button class="btn-blue" style="padding:5px;font-size:11px;" onclick="openStaffTxnModal(&quot;' + st.username + '&quot;)">📋 سجل</button>' +
-            '<button class="btn-danger" style="padding:5px;font-size:11px;" onclick="deleteStaff(&quot;' + st.username + '&quot;)">🗑️ حذف</button></td>';
+            tr.innerHTML = '<td><strong>' + st.username + '</strong></td><td>' + st.password + '</td><td style="color:var(--accent-gold);font-weight:700;">' + sharedStaffBalance.toFixed(2) + '$</td><td id="staff-actions-' + st.username + '"></td>';
+            const staffActionsTd = tr.querySelector('td:last-child');
+            const btnAddStaff = document.createElement('button'); btnAddStaff.className = 'btn-gold'; btnAddStaff.style.cssText = 'padding:5px;font-size:11px;margin:2px;'; btnAddStaff.innerText = '💰 إضافة'; btnAddStaff.onclick = function() { openStaffBalanceModal(st.username, st.balance || 0); }; staffActionsTd.appendChild(btnAddStaff);
+            const btnStaffHistory = document.createElement('button'); btnStaffHistory.className = 'btn-blue'; btnStaffHistory.style.cssText = 'padding:5px;font-size:11px;margin:2px;'; btnStaffHistory.innerText = '📋 سجل'; btnStaffHistory.onclick = function() { openStaffTxnModal(st.username); }; staffActionsTd.appendChild(btnStaffHistory);
+            const btnStaffDelete = document.createElement('button'); btnStaffDelete.className = 'btn-danger'; btnStaffDelete.style.cssText = 'padding:5px;font-size:11px;margin:2px;'; btnStaffDelete.innerText = '🗑️ حذف'; btnStaffDelete.onclick = function() { deleteStaff(st.username); }; staffActionsTd.appendChild(btnStaffDelete);
             tbody.appendChild(tr);
         });
+    }
+
+    function loadStaffUsageReport() {
+        db.ref('staff_transactions').once('value').then(snapshot => {
+            let txns = [];
+            snapshot.forEach(child => { let t = child.val(); t._key = child.key; txns.push(t); });
+
+            let totalAdded = 0, totalDeducted = 0;
+            txns.forEach(t => {
+                if (t.type === 'add') totalAdded += (t.amount || 0);
+                else if (t.type === 'deduct') totalDeducted += (t.amount || 0);
+            });
+
+            document.getElementById('reportCurrentBalance').innerText = sharedStaffBalance.toFixed(2) + ' $';
+            document.getElementById('reportTotalAdded').innerText = totalAdded.toFixed(2) + ' $';
+            document.getElementById('reportTotalDeducted').innerText = totalDeducted.toFixed(2) + ' $';
+            document.getElementById('reportTotalOperations').innerText = txns.length;
+
+            // Sort by date descending
+            txns.sort((a, b) => { const da = parseLogDate(a.date) || new Date(0); const db2 = parseLogDate(b.date) || new Date(0); return db2 - da; });
+
+            if (txns.length === 0) {
+                document.getElementById('staffUsageTable').innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-secondary);">لا توجد عمليات مسجلة</div>';
+                return;
+            }
+
+            let html = '<div class="table-wrapper"><table class="admin-table" style="font-size:12px;">';
+            html += '<thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>الوصف</th><th>الرصيد بعد</th><th>الموظف/الإداري</th></tr></thead><tbody>';
+            txns.forEach(t => {
+                const typeColor = t.type === 'add' ? 'var(--success-color)' : 'var(--danger-color)';
+                const typeText = t.type === 'add' ? '➕ إضافة' : '➖ خصم';
+                html += '<tr>';
+                html += '<td>' + (t.date || '') + '</td>';
+                html += '<td style="color:' + typeColor + '; font-weight:700;">' + typeText + '</td>';
+                html += '<td style="color:' + typeColor + '; font-weight:700;">' + (t.amount || 0).toFixed(2) + ' $</td>';
+                html += '<td>' + (t.description || '') + '</td>';
+                html += '<td>' + (t.balanceAfter || 0).toFixed(2) + ' $</td>';
+                html += '<td>' + (t.staff || t.admin || '---') + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table></div>';
+            document.getElementById('staffUsageTable').innerHTML = html;
+        });
+    }
+
+    function downloadStaffUsageReport() {
+        db.ref('staff_transactions').once('value').then(snapshot => {
+            let txns = [];
+            snapshot.forEach(child => { let t = child.val(); t._key = child.key; txns.push(t); });
+
+            let totalAdded = 0, totalDeducted = 0;
+            txns.forEach(t => {
+                if (t.type === 'add') totalAdded += (t.amount || 0);
+                else if (t.type === 'deduct') totalDeducted += (t.amount || 0);
+            });
+
+            let reportHtml = '<div id="pdf-report" style="width:210mm;padding:15mm;background:#ffffff;direction:rtl;font-family:Arial,sans-serif;color:#000;box-sizing:border-box;">';
+            reportHtml += '<div style="text-align:center;margin-bottom:15px;">';
+            reportHtml += '<h2 style="color:#cc0000;margin:0;font-size:22px;">Ali Recharge Agency</h2>';
+            reportHtml += '<h3 style="color:#333;margin:5px 0;font-size:16px;">فاتورة استخدام الرصيد المشترك</h3>';
+            reportHtml += '<p style="color:#666;font-size:12px;margin:5px 0;">تاريخ الفاتورة: ' + new Date().toLocaleDateString('en-US') + '</p>';
+            reportHtml += '<hr style="border:1px solid #cc0000;margin:10px 0;"></div>';
+
+            reportHtml += '<table style="width:100%;border-collapse:collapse;margin-bottom:15px;font-size:12px;color:#000;">';
+            reportHtml += '<tr><td style="padding:8px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;width:30%;">الرصيد الحالي</td><td style="padding:8px;border:1px solid #ddd;color:#ffd700;font-weight:bold;">' + sharedStaffBalance.toFixed(2) + ' $</td></tr>';
+            reportHtml += '<tr><td style="padding:8px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;">إجمالي الإضافات</td><td style="padding:8px;border:1px solid #ddd;color:#00cc66;font-weight:bold;">' + totalAdded.toFixed(2) + ' $</td></tr>';
+            reportHtml += '<tr><td style="padding:8px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;">إجمالي الخصومات</td><td style="padding:8px;border:1px solid #ddd;color:#cc0000;font-weight:bold;">' + totalDeducted.toFixed(2) + ' $</td></tr>';
+            reportHtml += '<tr><td style="padding:8px;border:1px solid #ddd;background:#f5f5f5;font-weight:bold;">عدد العمليات</td><td style="padding:8px;border:1px solid #ddd;">' + txns.length + '</td></tr>';
+            reportHtml += '</table>';
+
+            reportHtml += '<h4 style="color:#333;margin:15px 0 10px;font-size:14px;">تفاصيل العمليات</h4>';
+            reportHtml += '<table style="width:100%;border-collapse:collapse;font-size:11px;color:#000;">';
+            reportHtml += '<thead><tr style="background:#cc0000;color:#fff;">';
+            reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">التاريخ</th>';
+            reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">النوع</th>';
+            reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">المبلغ</th>';
+            reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الوصف</th>';
+            reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الرصيد بعد</th>';
+            reportHtml += '<th style="border:1px solid #999;padding:8px;text-align:center;">الموظف/الإداري</th>';
+            reportHtml += '</tr></thead><tbody>';
+
+            txns.forEach((t, i) => {
+                const bg = i % 2 === 0 ? '#ffffff' : '#f9f9f9';
+                const typeColor = t.type === 'add' ? '#00cc66' : '#cc0000';
+                const typeText = t.type === 'add' ? 'إضافة' : 'خصم';
+                reportHtml += '<tr style="background:' + bg + '">';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + (t.date || '') + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;color:' + typeColor + ';font-weight:bold;">' + typeText + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;color:' + typeColor + ';">' + (t.amount || 0).toFixed(2) + ' $</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + (t.description || '') + '</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + (t.balanceAfter || 0).toFixed(2) + ' $</td>';
+                reportHtml += '<td style="border:1px solid #ccc;padding:6px;text-align:center;">' + (t.staff || t.admin || '---') + '</td>';
+                reportHtml += '</tr>';
+            });
+
+            reportHtml += '</tbody></table></div>';
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = reportHtml;
+            tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0';
+            document.body.appendChild(tempDiv);
+            const element = tempDiv.querySelector('#pdf-report');
+            html2canvas(element, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210, pageHeight = 297;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight, position = 0;
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight; }
+                pdf.save('فاتورة_الرصيد_المشترك_' + new Date().toLocaleDateString('en-US').replace(/\//g, '-') + '.pdf');
+                document.body.removeChild(tempDiv);
+            }).catch(err => { console.error('PDF Error:', err); document.body.removeChild(tempDiv); });
+        });
+    }
+
+    // Load report when admin panel opens
+    function openAdminPanel() {
+        if (prompt("الباسورد السري للمدير:") === "1987") {
+            document.querySelectorAll('.form-page').forEach(p => p.classList.remove('active'));
+            document.getElementById('adminPanelPage').classList.add('active');
+            loadStaffUsageReport();
+        } else { alert("مرفوض!"); }
     }
 
     function handleCreateStaff(event) {
@@ -2087,9 +2277,7 @@
         const chargeDestination = document.querySelector('input[name="chargeDestination"]:checked').value;
         const amount = parseFloat(document.getElementById('chargeAmount').value);
         if (!amount || amount <= 0) { alert('❌ يرجى إدخال مبلغ صحيح!'); return; }
-        const staff = staffAccounts.find(s => s.username === currentLoggedStaff);
-        const staffBalance = staff ? (staff.balance || 0) : 0;
-        if (staffBalance < amount) { alert('❌ رصيدك غير كافٍ! الرصيد المتاح: ' + staffBalance.toFixed(2) + ' $'); return; }
+        if (sharedStaffBalance < amount) { alert('❌ الرصيد المشترك غير كافٍ! الرصيد المتاح: ' + sharedStaffBalance.toFixed(2) + ' $'); return; }
         let finalChargedId = staticId;
         if (chargeDestination === 'other') finalChargedId = document.getElementById('otherTargetId').value.trim();
         const now = new Date();
