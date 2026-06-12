@@ -1427,7 +1427,8 @@
         const submitBtn = document.getElementById('submitRequestBtn');
         if (amount > 0 && amount > balance) {
             if (warningDiv) warningDiv.classList.add('active');
-            if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
+            // Don't disable button - allow submission as debt
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; }
         } else {
             if (warningDiv) warningDiv.classList.remove('active');
             if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; }
@@ -1754,10 +1755,14 @@
                     return clientRef.update({ debt: newDebt, totalOrders: newOrders }).then(() => {
                         return userAccRef.once('value').then(uSnap => {
                             const uData = uSnap.val() || {};
-                            return userAccRef.update({ debt: (uData.debt || 0) + reqData.amount });
+                            // If user didn't pay from balance, add to user debt
+                            if (!reqData.paidFromBalance) {
+                                return userAccRef.update({ debt: (uData.debt || 0) + reqData.amount });
+                            }
+                            return Promise.resolve();
                         });
                     }).then(() => {
-                        const report = { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', requestKey: requestKey, appName: reqData.appName || '' };
+                        const report = { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', requestKey: requestKey, appName: reqData.appName || '', paidFromBalance: reqData.paidFromBalance || false };
                         return db.ref('shipping_logs').push().set(report);
                     }).then(() => {
                         sendToGoogleSheet("appendRow", { staff: currentLoggedStaff, clientName: reqData.userName, clientId: reqData.userId, destination: reqData.destination === 'self' ? 'لنفسه' : 'للغير', chargedId: reqData.targetId, amount: reqData.amount, time: reqData.time, source: 'user_portal', appName: reqData.appName || '' });
@@ -2498,8 +2503,9 @@
         if (!pendingDeleteLogKey || !pendingDeleteLogClientId) { cancelDelete(); return; }
         const logRef = db.ref('shipping_logs/' + pendingDeleteLogKey);
         const clientRef = db.ref('clients/' + pendingDeleteLogClientId);
+        let logData = null;
         logRef.once('value').then((logSnapshot) => {
-            const logData = logSnapshot.val();
+            logData = logSnapshot.val();
             return clientRef.once('value').then((snapshot) => {
                 const clientData = snapshot.val();
                 if (!clientData) { alert("خطأ: العميل غير موجود!"); cancelDelete(); return; }
@@ -2516,9 +2522,26 @@
                         const uData = uSnap.val() || {};
                         const currentUserDebt = parseFloat(uData.debt) || 0;
                         const newUserDebt = Math.max(0, currentUserDebt - pendingDeleteLogAmount);
+                        // If user paid from balance, restore balance
+                        if (logData && logData.paidFromBalance) {
+                            const currentBalance = uData.balance || 0;
+                            return userAccRef.update({ debt: newUserDebt, balance: currentBalance + pendingDeleteLogAmount });
+                        }
                         return userAccRef.update({ debt: newUserDebt });
                     });
                 }
+            }).then(() => {
+                // Restore shared staff balance
+                const newSharedBalance = sharedStaffBalance + pendingDeleteLogAmount;
+                const code = generateTxnCode();
+                const now = new Date().toLocaleDateString('en-US') + ', ' + new Date().toLocaleTimeString('en-US');
+                const txn = { type: 'add', amount: pendingDeleteLogAmount, code: code, date: now, description: 'إرجاع رصيد بعد حذف شحنة | العميل: ' + (logData ? logData.clientName : '') + ' (ID: ' + pendingDeleteLogClientId + ')', balanceAfter: newSharedBalance, staff: currentLoggedStaff || 'system', clientName: logData ? logData.clientName : '', clientId: pendingDeleteLogClientId };
+                return db.ref('staff_transactions').push().set(txn).then(() => {
+                    return db.ref('shared_staff_balance').set(newSharedBalance);
+                }).then(() => {
+                    sharedStaffBalance = newSharedBalance;
+                    updateStaffBalanceUI();
+                });
             }).then(() => {
                 if (logData && logData.requestKey) {
                     return db.ref('user_requests/' + logData.requestKey).remove();
@@ -2526,28 +2549,13 @@
             }).then(() => {
                 return logRef.remove();
             }).then(() => {
-                alert('✅ تم حذف الشحنة بنجاح!\n\n• خصم ' + pendingDeleteLogAmount + '$ من المديونية\n• عدد الشحنات: -1\n• تم الحذف من جميع الجداول');
+                alert('✅ تم حذف الشحنة بنجاح!
+
+• خصم ' + pendingDeleteLogAmount + '$ من المديونية
+• إرجاع ' + pendingDeleteLogAmount + '$ للرصيد المشترك
+• عدد الشحنات: -1
+• تم الحذف من جميع الجداول');
                 cancelDelete(); lookupDebtById();
             });
         }).catch((error) => { console.error("Delete error:", error); alert("❌ حدث خطأ أثناء الحذف: " + error.message); cancelDelete(); });
     }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const overlay = document.getElementById('deleteConfirmOverlay');
-        if (overlay) overlay.addEventListener('click', function(e) { if (e.target === this) cancelDelete(); });
-        const balanceOverlay = document.getElementById('balanceModalOverlay');
-        if (balanceOverlay) balanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeBalanceModal(); });
-        const editBalanceOverlay = document.getElementById('editBalanceModalOverlay');
-        if (editBalanceOverlay) editBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeEditBalanceModal(); });
-        const staffBalanceOverlay = document.getElementById('staffBalanceModalOverlay');
-        if (staffBalanceOverlay) staffBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffBalanceModal(); });
-        const staffEditBalanceOverlay = document.getElementById('staffEditBalanceModalOverlay');
-        if (staffEditBalanceOverlay) staffEditBalanceOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffEditBalanceModal(); });
-        const staffTxnOverlay = document.getElementById('staffTxnModalOverlay');
-        if (staffTxnOverlay) staffTxnOverlay.addEventListener('click', function(e) { if (e.target === this) closeStaffTxnModal(); });
-        const userTxnOverlay = document.getElementById('userTxnModalOverlay');
-        if (userTxnOverlay) userTxnOverlay.addEventListener('click', function(e) { if (e.target === this) closeUserTxnModal(); });
-    });
-</script>
-</body>
-</html>
